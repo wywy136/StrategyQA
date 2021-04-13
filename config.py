@@ -1,0 +1,16 @@
+from typing import List
+
+
+class Argument:
+    train_path: str = "./data/strategyqa_golden_train.json"
+    test_path: str = "./data/strategyqa_golden_test.json"
+    corpus_path: str = "./data/strategyqa_train_paragraphs.json"
+    fields: List = ["question", "evidence"]
+    max_length: int = 511
+
+    cuda: bool = True
+    epoch_num: int = 20
+    batch_size: int = 16
+    num_workers: int = 0
+    learning_rate: float = 1e-4
+    warmup_rate: float = 0.1
