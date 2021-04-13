@@ -56,6 +56,7 @@ class Trainer(object):
                 shuffle=True
             )
             for index, batch in enumerate(self.dataloader):
+                self.optimizer.zero_grad()
                 for key, tensor in batch.items():
                     batch[key] = tensor.to(self.device)
                 logits = self.model(

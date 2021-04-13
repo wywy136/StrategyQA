@@ -5,7 +5,7 @@ import torch
 
 class Reasoning(Module):
     def __init__(self):
-        Module.__init__(self)
+        super(Reasoning, self).__init__()
         self.bert = BertModel.from_pretrained('bert-base-uncased')
         self.classifer = Linear(in_features=768, out_features=2)
 

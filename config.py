@@ -8,7 +8,7 @@ class Argument:
     fields: List = ["question", "evidence"]
     max_length: int = 511
 
-    cuda: bool = True
+    cuda: bool = False
     epoch_num: int = 20
     batch_size: int = 8
     num_workers: int = 0
