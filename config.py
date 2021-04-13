@@ -5,7 +5,7 @@ class Argument:
     train_path: str = "./data/strategyqa_golden_train.json"
     test_path: str = "./data/strategyqa_golden_test.json"
     corpus_path: str = "./data/strategyqa_train_paragraphs.json"
-    fields: List = ["question", "evidence"]
+    fields: List = ["question", "evidence", "decomposition", "operator"]
     max_length: int = 511
 
     cuda: bool = False
@@ -13,6 +13,6 @@ class Argument:
     batch_size: int = 8
     num_workers: int = 0
     learning_rate: float = 1e-3
-    tuning_rate: float = 0.0
+    tuning_rate: float = 1e-5
     warmup_rate: float = 0.1
     weight_decay: float = 0.01

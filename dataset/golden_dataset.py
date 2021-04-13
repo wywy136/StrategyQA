@@ -19,6 +19,24 @@ class Golden_Dataset(Dataset):
         self.json_corpus: Dict[Dict] = json.load(self.corpus)
 
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.operator_set = ['greater', 'less', 'before', 'after', 'larger',
+                             'smaller', 'higher', 'lower', 'longer', 'shorter',
+                             'prior', 'same', 'identical to', 'equal', 'different',
+                             'difference', 'match', 'considered', 'least', 'enough',
+                             'and', 'or', 'all', 'also', 'both', 'included', 'include',
+                             'overlap', 'listed', 'within', 'have', 'excluded',
+                             'present', 'among', 'contain', 'absent from',
+                             'times', 'multiplied', 'positive', 'divided', 'plus']
+
+    def golden_sentence(self, question: str, paragraph: str) -> str:
+        pass
+
+    def get_operator(self, question: str) -> List[str]:
+        ans = []
+        for op in self.operator_set:
+            if op in question:
+                ans.append(op)
+        return ans
 
     def __len__(self) -> int:
         return len(self.json_data)
@@ -32,12 +50,19 @@ class Golden_Dataset(Dataset):
                 inputs += self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(piece[field]))
             if field == "evidence":
                 path = piece[field][0]
-                for step in path:
+                for step_index, step in enumerate(path):
                     for evidence in step:
                         if type(evidence) == list:
+                            if "decomposition" in self.arg.fields:
+                                text = piece['decomposition'][step_index]
+                                inputs += self.tokenizer.convert_tokens_to_ids(['[SEP]']+self.tokenizer.tokenize(text))
                             for paragraph in evidence:
                                 text = self.json_corpus[paragraph]['content']
                                 inputs += self.tokenizer.convert_tokens_to_ids(['[SEP]']+self.tokenizer.tokenize(text))
+                        if "operator" in self.arg.fields:
+                            if "operation" == evidence:
+                                operators = self.get_operator(piece['decomposition'][step_index])
+                                inputs += self.tokenizer.convert_tokens_to_ids(['[SEP]'] + operators)
 
         inputs = inputs[:self.arg.max_length]
         inputs.append(self.tokenizer.convert_tokens_to_ids('[SEP]'))
