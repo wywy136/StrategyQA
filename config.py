@@ -10,7 +10,7 @@ class Argument:
 
     cuda: bool = True
     epoch_num: int = 20
-    batch_size: int = 16
+    batch_size: int = 8
     num_workers: int = 0
     learning_rate: float = 1e-3
     tuning_rate: float = 0.0

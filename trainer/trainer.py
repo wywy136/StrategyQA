@@ -46,17 +46,7 @@ class Trainer(object):
     def train(self):
         for epoch in range(self.args.epoch_num):
 
-            test_dataloader = DataLoader(
-                dataset=self.test_dataset,
-                batch_size=self.args.batch_size,
-                num_workers=self.args.num_workers,
-                collate_fn=Golden_Collator(),
-                pin_memory=True if self.args.cuda else False,
-                shuffle=True
-            )
-            acc = self.evaluator(test_dataloader, self.model, self.device)
-            print(f'Evaluation Results: Accuracy {acc}')
-
+            self.model.train()
             self.dataloader = DataLoader(
                 dataset=self.dataset,
                 batch_size=self.args.batch_size,
@@ -81,3 +71,15 @@ class Trainer(object):
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'
                           f'Loss: {loss.item()}')
 
+            self.model.eval()
+            test_dataloader = DataLoader(
+                dataset=self.test_dataset,
+                batch_size=self.args.batch_size,
+                num_workers=self.args.num_workers,
+                collate_fn=Golden_Collator(),
+                pin_memory=True if self.args.cuda else False,
+                shuffle=True
+            )
+            with torch.no_grad():
+                acc = self.evaluator(test_dataloader, self.model, self.device)
+            print(f'Evaluation Results: Accuracy {acc}')
