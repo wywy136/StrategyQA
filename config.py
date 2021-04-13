@@ -12,5 +12,7 @@ class Argument:
     epoch_num: int = 20
     batch_size: int = 16
     num_workers: int = 0
-    learning_rate: float = 1e-4
+    learning_rate: float = 1e-3
+    tuning_rate: float = 0.0
     warmup_rate: float = 0.1
+    weight_decay: float = 0.01

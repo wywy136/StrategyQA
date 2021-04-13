@@ -20,14 +20,23 @@ class Trainer(object):
         self.model = Reasoning()
         self.model.to(self.device)
 
+        listed_params = list(self.model.named_parameters())
+        grouped_parameters = [
+            {'params': [p for n, p in listed_params if 'bert' in n],
+             'lr': self.args.tuning_rate,
+             'weight_decay': self.args.weight_decay},
+            {'params': [p for n, p in listed_params if 'bert' not in n],
+             'weight_decay': self.args.weight_decay}
+        ]
         self.optimizer = AdamW(
-            self.model.parameters(),
-            lr=self.args.learning_rate
+            grouped_parameters,
+            lr=self.args.learning_rate,
+            correct_bias=False
         )
         total_steps = (self.args.epoch_num * len(self.dataset)) // self.args.batch_size
         self.scheduler = get_linear_schedule_with_warmup(
             self.optimizer,
-            num_warmup_steps=self.args.warmup_rate * total_steps,
+            num_warmup_steps=int(self.args.warmup_rate * total_steps),
             num_training_steps=total_steps
         )
 
