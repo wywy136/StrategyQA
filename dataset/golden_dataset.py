@@ -3,7 +3,7 @@ import json
 
 import torch
 from torch.utils.data import Dataset
-from transformers import BertTokenizer
+from transformers import RobertaTokenizer
 
 from config import Argument
 
@@ -18,7 +18,7 @@ class Golden_Dataset(Dataset):
         self.json_data: List[Dict] = json.load(self.data)
         self.json_corpus: Dict[Dict] = json.load(self.corpus)
 
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
         self.operator_set = ['greater', 'less', 'before', 'after', 'larger',
                              'smaller', 'higher', 'lower', 'longer', 'shorter',
                              'prior', 'same', 'identical to', 'equal', 'different',
