@@ -2,10 +2,11 @@ from typing import List
 
 
 class Argument:
-    train_path: str = "./data/strategyqa_golden_train.json"
-    test_path: str = "./data/strategyqa_golden_test.json"
+    train_path: str = "./data/strategyqa_train_train.json"
+    test_path: str = "./data/strategyqa_train_test.json"
+    dev_path: str = "./data/strategyqa_train_dev.json"
     corpus_path: str = "./data/strategyqa_train_paragraphs.json"
-    fields: List = ["question", "evidence", "decomposition", "operator"]
+    fields: List = ["question"]
     max_length: int = 511
 
     cuda: bool = False

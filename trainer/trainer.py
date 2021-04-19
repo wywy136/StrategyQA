@@ -3,7 +3,7 @@ import torch
 from torch.nn import CrossEntropyLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
 
-from model.bert import Reasoning
+from model.roberta import Reasoning
 from dataset.golden_dataset import Golden_Dataset, Golden_Collator
 from config import Argument
 from evaluator import Evaluator
