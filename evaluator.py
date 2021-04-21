@@ -10,9 +10,10 @@ class Evaluator(object):
         for index, batch in enumerate(dataloader):
             for key, tensor in batch.items():
                 batch[key] = tensor.to(device)
-            logits = model(
+            loss, logits = model(
                 input=batch['input_ids'].long(),
-                mask=batch['masks']
+                mask=batch['masks'],
+                label=batch['label'].long()
             )
             for i in range(logits.size(0)):
                 prd = torch.argmax(logits[i]).item()
