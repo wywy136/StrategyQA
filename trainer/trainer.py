@@ -21,6 +21,9 @@ class Trainer(object):
         self.model = Reasoning()
         self.model.to(self.device)
 
+        if self.args.load_pretrained:
+            self.load_pretrained(self.args.pretrained_model_path)
+
         # listed_params = list(self.model.named_parameters())
         # grouped_parameters = [
         #     {'params': [p for n, p in listed_params if 'bert' in n],
@@ -44,6 +47,19 @@ class Trainer(object):
         self.loss_fn = CrossEntropyLoss()
         self.evaluator = Evaluator()
         self.max_acc = 0.
+
+    def load_pretrained(self, path: str):
+        pretrained_model: torch.nn.Module = torch.load(path)
+        pretrained_params = [key for key, value in pretrained_model.named_parameters()]
+        loaded_params = []
+        for key, value in self.model.named_parameters():
+            if key in pretrained_params:
+                self.model.state_dict()[key] = pretrained_model.state_dict()[key]
+                loaded_params.append(key)
+        print(f'The following parameters are loaded from pretrained model: {loaded_params}')
+
+    def save(self):
+        torch.save(self.model, self.args.model_path)
 
     def train(self):
         for epoch in range(self.args.epoch_num):

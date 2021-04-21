@@ -1,9 +1,11 @@
 from trainer.trainer import Trainer
+from trainer.pretrainer import Pretrainer
 
 
 def main():
-    t = Trainer()
-    t.train()
+    t = Pretrainer()
+    t.pretrain()
+    t.save()
 
 
 if __name__ == '__main__':

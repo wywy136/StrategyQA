@@ -7,7 +7,7 @@ from transformers import RobertaTokenizer
 from config import Argument
 
 
-class BoolQ_Dataset(Dataset):
+class TwentyQuestion_Dataset(Dataset):
     def __int__(self):
         Dataset.__init__(self)
         self.arg = Argument
@@ -21,11 +21,11 @@ class BoolQ_Dataset(Dataset):
 
     def __getitem__(self, item: int) -> Dict:
         data = self.json_data[item]
-        question = self.tokenizer(data['question'])["input_ids"]
-        answer = 1 if data["answer"] else 0
-        passage = self.tokenizer(data['passage'])["input_ids"]
-        input_ids = question + [2] + passage[1:]
+        question: str = data['question']
+        question.replace('it', data['subject'])
+        input_ids = self.tokenizer(question)["input_ids"]
         masks = [1] * len(input_ids)
+        answer = 1 if data['majority'] else 0
 
         return {
             "input": input_ids,
