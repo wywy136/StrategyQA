@@ -8,6 +8,8 @@ class Argument:
     corpus_path: str = "./data/strategyqa_train_paragraphs.json"
     fields: List = ["question"]
     max_length: int = 511
+    boolq_path: str = './data/boolq/train.jsonl'
+    twentyquestion_path: str = './data/twentyquestions/v1.0.twentyquestions.tar'
 
     cuda: bool = False
     epoch_num: int = 20

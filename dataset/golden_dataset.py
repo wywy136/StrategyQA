@@ -76,7 +76,7 @@ class Golden_Dataset(Dataset):
         }
 
 
-class Golden_Collator(object):
+class Collator(object):
     def __call__(self, batch: Dict):
         input_ids = [each['input'] for each in batch]
         masks = [each['mask'] for each in batch]
@@ -85,7 +85,7 @@ class Golden_Collator(object):
         max_len = max([len(each) for each in input_ids])
 
         for i in range(len(input_ids)):
-            input_ids[i].extend([0] * (max_len - len(input_ids[i])))
+            input_ids[i].extend([1] * (max_len - len(input_ids[i])))
             masks[i].extend([0] * (max_len - len(masks[i])))
 
         input_ids = torch.tensor(input_ids, dtype=torch.int32)

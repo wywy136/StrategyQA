@@ -4,7 +4,7 @@ from torch.nn import CrossEntropyLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 from model.roberta import Reasoning
-from dataset.golden_dataset import Golden_Dataset, Golden_Collator
+from dataset.golden_dataset import Golden_Dataset, Collator
 from config import Argument
 from evaluator import Evaluator
 
@@ -15,21 +15,22 @@ class Trainer(object):
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
         self.dataset = Golden_Dataset()
+        self.dev_dataset = Golden_Dataset('dev')
         self.test_dataset = Golden_Dataset('test')
         self.dataloader = None
         self.model = Reasoning()
         self.model.to(self.device)
 
-        listed_params = list(self.model.named_parameters())
-        grouped_parameters = [
-            {'params': [p for n, p in listed_params if 'bert' in n],
-             'lr': self.args.tuning_rate,
-             'weight_decay': self.args.weight_decay},
-            {'params': [p for n, p in listed_params if 'bert' not in n],
-             'weight_decay': self.args.weight_decay}
-        ]
+        # listed_params = list(self.model.named_parameters())
+        # grouped_parameters = [
+        #     {'params': [p for n, p in listed_params if 'bert' in n],
+        #      'lr': self.args.tuning_rate,
+        #      'weight_decay': self.args.weight_decay},
+        #     {'params': [p for n, p in listed_params if 'bert' not in n],
+        #      'weight_decay': self.args.weight_decay}
+        # ]
         self.optimizer = AdamW(
-            grouped_parameters,
+            self.model.parameters(),
             lr=self.args.learning_rate,
             correct_bias=False
         )
@@ -42,6 +43,7 @@ class Trainer(object):
 
         self.loss_fn = CrossEntropyLoss()
         self.evaluator = Evaluator()
+        self.max_acc = 0.
 
     def train(self):
         for epoch in range(self.args.epoch_num):
@@ -51,7 +53,7 @@ class Trainer(object):
                 dataset=self.dataset,
                 batch_size=self.args.batch_size,
                 num_workers=self.args.num_workers,
-                collate_fn=Golden_Collator(),
+                collate_fn=Collator(),
                 pin_memory=True if self.args.cuda else False,
                 shuffle=True
             )
@@ -59,11 +61,11 @@ class Trainer(object):
                 self.optimizer.zero_grad()
                 for key, tensor in batch.items():
                     batch[key] = tensor.to(self.device)
-                logits = self.model(
+                loss, logits = self.model(
                     input=batch['input_ids'].long(),
-                    mask=batch['masks']
+                    mask=batch['masks'],
+                    label=batch['labels'].long()
                 )
-                loss = self.loss_fn(logits, batch['labels'].long())
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
@@ -73,14 +75,30 @@ class Trainer(object):
                           f'Loss: {loss.item()}')
 
             self.model.eval()
-            test_dataloader = DataLoader(
-                dataset=self.test_dataset,
+
+            dev_dataloader = DataLoader(
+                dataset=self.dev_dataset,
                 batch_size=self.args.batch_size,
                 num_workers=self.args.num_workers,
-                collate_fn=Golden_Collator(),
+                collate_fn=Collator(),
                 pin_memory=True if self.args.cuda else False,
-                shuffle=True
+                shuffle=False
             )
+            print('Evaluating on Dev ...')
             with torch.no_grad():
-                acc = self.evaluator(test_dataloader, self.model, self.device)
-            print(f'Evaluation Results: Accuracy {acc}')
+                acc = self.evaluator(dev_dataloader, self.model, self.device)
+            if acc > self.max_acc:
+                print(f'Update! Dev performance: Accuracy {acc}')
+                self.max_acc = acc
+
+                test_dataloader = DataLoader(
+                    dataset=self.test_dataset,
+                    batch_size=self.args.batch_size,
+                    num_workers=self.args.num_workers,
+                    collate_fn=Collator(),
+                    pin_memory=True if self.args.cuda else False,
+                    shuffle=False
+                )
+                with torch.no_grad():
+                    acc = self.evaluator(test_dataloader, self.model, self.device)
+                print(f'Test performance: Accuracy {acc}')
