@@ -55,10 +55,10 @@ class Golden_Dataset(Dataset):
                         if type(evidence) == list:
                             if "decomposition" in self.arg.fields:
                                 text = piece['decomposition'][step_index]
-                                inputs += [2] + self.tokenizer(text)[1:]
+                                inputs += [2] + self.tokenizer(text)["input_ids"][1:]
                             for paragraph in evidence:
                                 text = self.json_corpus[paragraph]['content']
-                                inputs += [2] + self.tokenizer(text)[1:]
+                                inputs += [2] + self.tokenizer(text)["input_ids"][1:]
                         if "operator" in self.arg.fields:
                             if "operation" == evidence:
                                 operators = self.get_operator(piece['decomposition'][step_index])

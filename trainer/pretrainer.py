@@ -22,6 +22,7 @@ class Pretrainer(object):
         self.optimizer = AdamW(
             self.model.parameters(),
             lr=self.args.pretrain_learning_rate,
+            weight_decay=self.args.weight_decay,
             correct_bias=False
         )
         total_steps = (self.args.epoch_num * len(self.dataset)) // self.args.batch_size
