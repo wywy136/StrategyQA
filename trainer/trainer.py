@@ -22,7 +22,7 @@ class Trainer(object):
         self.model.to(self.device)
 
         if self.args.load_pretrained:
-            self.load_pretrained(self.args.pretrained_model_path)
+            self.load_pretrained()
 
         # listed_params = list(self.model.named_parameters())
         # grouped_parameters = [
@@ -48,8 +48,8 @@ class Trainer(object):
         self.evaluator = Evaluator()
         self.max_acc = 0.
 
-    def load_pretrained(self, path: str):
-        pretrained_model: torch.nn.Module = torch.load(path)
+    def load_pretrained(self):
+        pretrained_model: torch.nn.Module = torch.load(self.args.pretrained_model_path)
         pretrained_params = [key for key, value in pretrained_model.named_parameters()]
         loaded_params = []
         for key, value in self.model.named_parameters():

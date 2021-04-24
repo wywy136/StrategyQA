@@ -9,12 +9,12 @@ class Argument:
     test_path: str = "./data/strategyqa_train_test.json"
     dev_path: str = "./data/strategyqa_train_dev.json"
     corpus_path: str = "./data/strategyqa_train_paragraphs.json"
-    fields: List = ["question"]
+    fields: List = ["question", "evidence"]
     max_length: int = 511
     boolq_path: str = './data/boolq/train.jsonl'
     twentyquestion_path: str = './data/twentyquestions/v1.0.twentyquestions.tar'
 
-    cuda: bool = False
+    cuda: bool = True
     num_workers: int = 0
     load_pretrained: bool = True
 
