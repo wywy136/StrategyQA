@@ -8,12 +8,12 @@ from transformers import RobertaTokenizer
 from config import Argument
 
 
-class Golden_Dataset(Dataset):
+class GoldenDataset(Dataset):
     def __init__(self, split: str = 'train'):
         Dataset.__init__(self)
         self.arg = Argument
         self.data = open(self.arg.train_path, 'r', encoding='utf-8') if split == 'train' else \
-            open(self.arg.test_path, 'r', encoding='utf-8')
+            open(self.arg.dev_path, 'r', encoding='utf-8')
         self.corpus = open(self.arg.corpus_path, 'r', encoding='utf-8')
         self.json_data: List[Dict] = json.load(self.data)
         self.json_corpus: Dict[Dict] = json.load(self.corpus)
@@ -31,12 +31,12 @@ class Golden_Dataset(Dataset):
     def golden_sentence(self, question: str, paragraph: str) -> str:
         pass
 
-    def get_operator(self, question: str) -> List[str]:
+    def get_operator(self, question: str) -> str:
         ans = []
         for op in self.operator_set:
             if op in question:
                 ans.append(op)
-        return ans
+        return ''.join(ans)
 
     def __len__(self) -> int:
         return len(self.json_data)
@@ -65,7 +65,7 @@ class Golden_Dataset(Dataset):
                                 inputs += [2] + self.tokenizer(operators)[1:]
 
         inputs = inputs[:self.arg.max_length]
-        inputs.append(self.tokenizer.convert_tokens_to_ids('[SEP]'))
+        # inputs.append(self.tokenizer.convert_tokens_to_ids('[SEP]'))
         masks = [1] * len(inputs)
         ans = 1 if piece['answer'] else 0
 

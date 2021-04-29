@@ -4,7 +4,7 @@ from torch.nn import CrossEntropyLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 from model.roberta import Reasoning
-from dataset.golden_dataset import Golden_Dataset, Collator
+from dataset.golden_dataset import GoldenDataset, Collator
 from config import Argument
 from evaluator import Evaluator
 
@@ -14,7 +14,7 @@ class Pretrainer(object):
         self.args = Argument
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
-        self.dataset = Golden_Dataset()
+        self.dataset = GoldenDataset()
         self.dataloader = None
         self.model = Reasoning()
         self.model.to(self.device)

@@ -7,9 +7,9 @@ def main():
     # t.pretrain()
     # t.save()
     m = Trainer()
-    m.load_pretrained()
+    # m.load_pretrained()
     m.train()
-    m.save()
+    # m.save()
 
 
 if __name__ == '__main__':
