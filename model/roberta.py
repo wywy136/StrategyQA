@@ -7,7 +7,7 @@ from typing import Tuple
 class Reasoning(Module):
     def __init__(self):
         super(Reasoning, self).__init__()
-        self.roberta = RobertaForSequenceClassification.from_pretrained('roberta-base')
+        self.roberta = RobertaForSequenceClassification.from_pretrained('roberta-large')
         # self.classifer = Linear(in_features=768, out_features=2)
 
     def forward(self, input: torch.Tensor, mask: torch.Tensor, label: torch.Tensor) -> Tuple:

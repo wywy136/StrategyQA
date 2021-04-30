@@ -1,0 +1,21 @@
+from transformers import BertModel
+from torch.nn import Module
+from torch import nn
+import torch
+
+
+class GoldenSentenceBert(Module):
+    def __init__(self):
+        super(GoldenSentenceBert, self).__init__()
+        self.bert = BertModel.from_pretrained('bert-base-uncased')
+        self.classifier = nn.Linear(768, 2)
+
+    def forward(self, inputs, masks):
+        logits = []
+        inputs = inputs.permute(1, 0, 2)  # [seq_num, batch, 768]
+        masks = masks.permute(1, 0, 2)
+        for i in range(inputs.size(0)):
+            cls = self.bert(inputs[i], masks[i], return_dict=True).pooler_output  # [batch, hidden]
+            logit = self.classifier(cls).unsqueeze(0)  # [1, batch, 2]
+            logits.append(logit)
+        return torch.cat(logits, 0).permute(1, 0, 2)

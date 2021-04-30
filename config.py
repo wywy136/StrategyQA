@@ -3,7 +3,7 @@ from typing import List
 
 class Argument:
     pretrained_model_path: str = './pretrained_model/6_STAR_ORA-P.tar/6_STAR_ORA-P/weights.th'
-    model_path: str = './checkpoints/2.pth'
+    model_path: str = './checkpoints/golden_sentence/1.pth'
 
     train_path: str = "./data/train.json"
     # test_path: str = "./data/strategyqa_train_test.json"
@@ -14,6 +14,7 @@ class Argument:
     max_length: int = 512
     boolq_path: str = './data/boolq/train.jsonl'
     twentyquestion_path: str = './data/twentyquestions/v1.0.twentyquestions.tar'
+    squad_path: str = './data/squad/train-v2.0.json'
 
     cuda: bool = False
     num_workers: int = 0
