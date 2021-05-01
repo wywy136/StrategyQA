@@ -14,7 +14,8 @@ class Argument:
     max_length: int = 512
     boolq_path: str = './data/boolq/train.jsonl'
     twentyquestion_path: str = './data/twentyquestions/v1.0.twentyquestions.tar'
-    squad_path: str = './data/squad/train-v2.0.json'
+    squad_train_path: str = './data/squad/train-v2.0.json'
+    squad_dev_path: str = './data/squad/dev-v2.0.json'
 
     cuda: bool = False
     num_workers: int = 0
@@ -26,7 +27,7 @@ class Argument:
     pretrain_learning_rate: float = 1e-5
 
     epoch_num: int = 20
-    batch_size: int = 16
+    batch_size: int = 2
     learning_rate: float = 1e-5
     tuning_rate: float = 1e-5
 

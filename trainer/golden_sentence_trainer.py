@@ -14,8 +14,8 @@ class GoldenSentenceTrainer(object):
         self.args = Argument
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
-        self.dataset = SquadDataset()
-        # self.dev_dataset = dataset_dict[self.args.dataset]('dev')
+        self.dataset = SquadDataset('train')
+        self.dev_dataset = SquadDataset('dev')
         # self.test_dataset = Golden_Dataset('test')
         self.dataloader = None
         self.model = GoldenSentenceBert()
@@ -69,11 +69,21 @@ class GoldenSentenceTrainer(object):
             # )
             # print('Evaluating on Dev ...')
             # with torch.no_grad():
-            #     acc = self.evaluator(dev_dataloader, self.model, self.device)
-            # if acc > self.max_acc:
-            #     print(f'Update! Dev performance: Accuracy {acc}')
-            #     self.max_acc = acc
-            #     self.save()
+            # #     acc = self.evaluator(dev_dataloader, self.model, self.device)
+            # # if acc > self.max_acc:
+            # #     print(f'Update! Dev performance: Accuracy {acc}')
+            # #     self.max_acc = acc
+            # #     self.save()
+            #     for index, batch in enumerate(dev_dataloader):
+            #         # self.optimizer.zero_grad()
+            #         for key, tensor in batch.items():
+            #             batch[key] = tensor.to(self.device)
+            #         logits = self.model(
+            #             inputs=batch['inputs'],
+            #             masks=batch['masks']
+            #         )
+            #         predicted = torch.argmax(logits)
+            #
 
             self.model.train()
             self.dataloader = DataLoader(
@@ -92,8 +102,8 @@ class GoldenSentenceTrainer(object):
                     inputs=batch['inputs'],
                     masks=batch['masks']
                 )
-                loss = self.loss_fn(logits, batch["labels"])
-                # loss = self.calculate_loss(logits, batch["labels"])
+                # loss = self.loss_fn(logits, batch["labels"])
+                loss = self.calculate_loss(logits, batch["labels"])
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
@@ -101,5 +111,8 @@ class GoldenSentenceTrainer(object):
                 if index % 100 == 0:
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'
                           f'Loss: {loss.item()}')
+
+                del batch, logits, loss
+                torch.cuda.empty_cache()
 
             self.save()
