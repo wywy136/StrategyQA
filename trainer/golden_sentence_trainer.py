@@ -48,7 +48,7 @@ class GoldenSentenceTrainer(object):
 
     def calculate_loss(self, logit, golden) -> torch.Tensor:
         logit = logit.reshape(-1, 2)
-        golden = golden.reshape(-1, 2)
+        golden = golden.reshape(-1)
         return self.loss_fn(logit, golden)
 
     def save(self):
@@ -92,7 +92,8 @@ class GoldenSentenceTrainer(object):
                     inputs=batch['inputs'],
                     masks=batch['masks']
                 )
-                loss = self.calculate_loss(logits, batch["labels"])
+                loss = self.loss_fn(logits, batch["labels"])
+                # loss = self.calculate_loss(logits, batch["labels"])
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
