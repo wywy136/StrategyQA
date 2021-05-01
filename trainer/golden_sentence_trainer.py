@@ -102,8 +102,8 @@ class GoldenSentenceTrainer(object):
                     inputs=batch['inputs'],
                     masks=batch['masks']
                 )
-                # loss = self.loss_fn(logits, batch["labels"])
-                loss = self.calculate_loss(logits, batch["labels"])
+                loss = self.loss_fn(logits, batch["labels"])
+                # loss = self.calculate_loss(logits, batch["labels"])
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
