@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader
 import torch
 from torch.nn import CrossEntropyLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
+from tqdm import tqdm
 
 from model.golden_sentence_bert import GoldenSentenceBert
 from dataset.squad import SquadDataset, SquadDatasetCollator
@@ -58,32 +59,44 @@ class GoldenSentenceTrainer(object):
     def train(self):
         for epoch in range(self.args.epoch_num):
 
-            # self.model.eval()
-            # dev_dataloader = DataLoader(
-            #     dataset=self.dev_dataset,
-            #     batch_size=self.args.batch_size,
-            #     num_workers=self.args.num_workers,
-            #     collate_fn=Collator(),
-            #     pin_memory=True if self.args.cuda else False,
-            #     shuffle=False
-            # )
-            # print('Evaluating on Dev ...')
-            # with torch.no_grad():
-            # #     acc = self.evaluator(dev_dataloader, self.model, self.device)
-            # # if acc > self.max_acc:
-            # #     print(f'Update! Dev performance: Accuracy {acc}')
-            # #     self.max_acc = acc
-            # #     self.save()
-            #     for index, batch in enumerate(dev_dataloader):
-            #         # self.optimizer.zero_grad()
-            #         for key, tensor in batch.items():
-            #             batch[key] = tensor.to(self.device)
-            #         logits = self.model(
-            #             inputs=batch['inputs'],
-            #             masks=batch['masks']
-            #         )
-            #         predicted = torch.argmax(logits)
-            #
+            self.model.eval()
+            dev_dataloader = DataLoader(
+                dataset=self.dev_dataset,
+                batch_size=self.args.batch_size,
+                num_workers=self.args.num_workers,
+                collate_fn=SquadDatasetCollator(),
+                pin_memory=True if self.args.cuda else False,
+                shuffle=False
+            )
+            print('Evaluating on Dev ...')
+            print(len(self.dev_dataset))
+            golden = 0
+            prediction = 0
+            with torch.no_grad():
+            #     acc = self.evaluator(dev_dataloader, self.model, self.device)
+            # if acc > self.max_acc:
+            #     print(f'Update! Dev performance: Accuracy {acc}')
+            #     self.max_acc = acc
+            #     self.save()
+                for index, batch in enumerate(tqdm(dev_dataloader)):
+                    # self.optimizer.zero_grad()
+                    for key, tensor in batch.items():
+                        batch[key] = tensor.to(self.device)
+                    logits = self.model(
+                        inputs=batch['inputs'],
+                        masks=batch['masks']
+                    )
+                    predicted = torch.argmax(logits, dim=1)
+                    for i in range(batch['labels'].size(0)):
+                        if batch['labels'][i].item() == 1:
+                            golden += 1
+                            if predicted[i].item() == 1:
+                                prediction += 1
+            acc = prediction / golden
+            if acc > self.max_acc:
+                self.max_acc = acc
+                print('Update!')
+            print(f'{acc}')
 
             self.model.train()
             self.dataloader = DataLoader(
@@ -91,10 +104,9 @@ class GoldenSentenceTrainer(object):
                 batch_size=self.args.batch_size,
                 num_workers=self.args.num_workers,
                 collate_fn=SquadDatasetCollator(),
-                pin_memory=True if self.args.cuda else False,
                 shuffle=True
             )
-            for index, batch in enumerate(self.dataloader):
+            for index, batch in enumerate(tqdm(self.dataloader)):
                 self.optimizer.zero_grad()
                 for key, tensor in batch.items():
                     batch[key] = tensor.to(self.device)
@@ -108,11 +120,11 @@ class GoldenSentenceTrainer(object):
                 self.optimizer.step()
                 self.scheduler.step()
 
-                if index % 100 == 0:
+                if index % 200 == 0:
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'
                           f'Loss: {loss.item()}')
 
-                del batch, logits, loss
+                # del batch, logits, loss
                 torch.cuda.empty_cache()
 
             self.save()

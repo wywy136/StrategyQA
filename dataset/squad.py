@@ -25,21 +25,22 @@ class SquadDataset(Dataset):
                     if not qa["is_impossible"]:
                         question = qa["question"]
                         answer = qa["answers"][0]["text"]
-                        self.combined_data.append({
-                            "question": question,
-                            "context": context,
-                            "answer": answer
-                        })
-                        # for sent_index, sent in enumerate(sent_tokenize(context)):
-                        #     label = 0
-                        #     if answer in sent:
-                        #         label = 1
-                        #     self.combined_data.append({
-                        #         "question": question,
-                        #         "answer": label,
-                        #         "context": context,
-                        #         "sent": sent
-                        #     })
+                        # self.combined_data.append({
+                        #     "question": question,
+                        #     "context": context,
+                        #     "answer": answer
+                        # })
+                        for sent_index, sent in enumerate(sent_tokenize(context)):
+                            label = 0
+                            if answer in sent:
+                                label = 1
+                            self.combined_data.append({
+                                "question": question,
+                                "answer": label,
+                                "context": context,
+                                "sent": sent
+                            })
+        self.combined_data = self.combined_data[:200000]
 
     def __len__(self) -> int:
         return len(self.combined_data)
