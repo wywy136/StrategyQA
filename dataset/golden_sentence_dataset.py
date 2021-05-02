@@ -22,15 +22,20 @@ class GoldenSentenceDataset(GoldenDataset):
             "operation": self.tokenizer(self.get_operator(piece['question']))["input_ids"]
         }
         for step_index, step in enumerate(path):
-            if step == ['operation']:
-                continue
-            else:
-                for evidence in step:
-                    if evidence == "operation" or evidence == "no_evidence":
-                        continue
-                    for paragraph in evidence:
-                        golden_sentence = self.find(facts, self.json_corpus[paragraph]['content'])
-                        ret_dict["golden_sentence"].append(self.tokenizer(golden_sentence)["input_ids"])
+            if step_index >= len(piece["golden_sentence"]):
+                break
+            for gdsent in piece["golden_sentence"][step_index]:
+                ret_dict["golden_sentence"].append(self.tokenizer(gdsent)["input_ids"])
+            # if step == ['operation']:
+            #     continue
+            # else:
+                # for evidence in step:
+                #     if evidence == "operation" or evidence == "no_evidence":
+                #         continue
+                #     for paragraph in evidence:
+                #         golden_sentence = self.find(facts, self.json_corpus[paragraph]['content'])
+                #         ret_dict["golden_sentence"].append(self.tokenizer(golden_sentence)["input_ids"])
+
         inputs = ret_dict["question"]
         for gd_sent in ret_dict["golden_sentence"]:
             inputs += [2] + gd_sent[1:]
