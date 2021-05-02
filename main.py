@@ -5,15 +5,16 @@ from golden_sentence_predictor.squad import SquadGoldenSentencePredictor
 
 
 def main():
-    # t = Pretrainer()
+    t = Trainer()
+    t.train()
     # t.pretrain()
     # t.save()
     # m = GoldenSentenceTrainer()
     # m.load_pretrained()
     # m.train()
     # m.save()
-    s = SquadGoldenSentencePredictor('dev')
-    s.predict()
+    # s = SquadGoldenSentencePredictor('dev')
+    # s.predict()
 
 
 if __name__ == '__main__':

@@ -3,11 +3,11 @@ from typing import List
 
 class Argument:
     pretrained_model_path: str = './pretrained_model/6_STAR_ORA-P.tar/6_STAR_ORA-P/weights.th'
-    model_path: str = './checkpoints/gdsent_predict_squad/1.pth'
+    model_path: str = './checkpoints/ora_p_golden_sentence/1.pth'
 
-    train_path: str = "./data/train.json"
+    train_path: str = "./data/train_gdsent.json"
     # test_path: str = "./data/strategyqa_train_test.json"
-    dev_path: str = "./data/dev.json"
+    dev_path: str = "./data/dev_gdsent.json"
     corpus_path: str = "./data/strategyqa_train_paragraphs.json"
     train_gdsent_path: str = "./data/train_gdsent.json"
     dev_gdsent_path: str = "./data/dev_gdsent.json"
@@ -21,7 +21,7 @@ class Argument:
 
     cuda: bool = False
     num_workers: int = 0
-    load_pretrained: bool = True
+    load_pretrained: bool = False
 
     pretrain_epoch_num_boolq: int = 20
     pretrain_epoch_num_20q: int = 20
