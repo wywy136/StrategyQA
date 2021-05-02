@@ -3,12 +3,14 @@ from typing import List
 
 class Argument:
     pretrained_model_path: str = './pretrained_model/6_STAR_ORA-P.tar/6_STAR_ORA-P/weights.th'
-    model_path: str = './checkpoints/golden_sentence/1.pth'
+    model_path: str = './checkpoints/gdsent_predict_squad/1.pth'
 
     train_path: str = "./data/train.json"
     # test_path: str = "./data/strategyqa_train_test.json"
     dev_path: str = "./data/dev.json"
     corpus_path: str = "./data/strategyqa_train_paragraphs.json"
+    train_gdsent_path: str = "./data/train_gdsent.json"
+    dev_gdsent_path: str = "./data/dev_gdsent.json"
     dataset: str = "golden_sentence_dataset"
     fields: List = ["question"]
     max_length: int = 512
@@ -27,7 +29,7 @@ class Argument:
     pretrain_learning_rate: float = 1e-5
 
     epoch_num: int = 20
-    batch_size: int = 2
+    batch_size: int = 16
     learning_rate: float = 1e-5
     tuning_rate: float = 1e-5
 

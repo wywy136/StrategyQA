@@ -45,7 +45,7 @@ class GoldenSentenceTrainer(object):
 
         self.loss_fn = CrossEntropyLoss(ignore_index=-1)
         self.evaluator = Evaluator()
-        self.max_acc = 0.
+        self.max_f1 = 0.
 
     def calculate_loss(self, logit, golden) -> torch.Tensor:
         logit = logit.reshape(-1, 2)
@@ -70,8 +70,9 @@ class GoldenSentenceTrainer(object):
             )
             print('Evaluating on Dev ...')
             print(len(self.dev_dataset))
-            golden = 0
-            prediction = 0
+            precision_denom = 0
+            recall_denom = 0
+            matched = 0
             with torch.no_grad():
             #     acc = self.evaluator(dev_dataloader, self.model, self.device)
             # if acc > self.max_acc:
@@ -89,14 +90,18 @@ class GoldenSentenceTrainer(object):
                     predicted = torch.argmax(logits, dim=1)
                     for i in range(batch['labels'].size(0)):
                         if batch['labels'][i].item() == 1:
-                            golden += 1
-                            if predicted[i].item() == 1:
-                                prediction += 1
-            acc = prediction / golden
-            if acc > self.max_acc:
-                self.max_acc = acc
+                            recall_denom += 1
+                        if predicted[i].item() == 1:
+                            precision_denom += 1
+                        if batch['labels'][i].item() == 1 and predicted[i].item() == 1:
+                            matched += 1
+            precision = matched / (precision_denom + 1e-5)
+            recall = matched / (recall_denom + 1e-5)
+            f1 = 2 * precision * recall / (precision + recall + 1e-5)
+            if f1 > self.max_f1:
+                self.max_f1 = f1
                 print('Update!')
-            print(f'{acc}')
+            print(f'P: {precision}\tR: {recall}\tF1: {f1}')
 
             self.model.train()
             self.dataloader = DataLoader(
@@ -107,7 +112,7 @@ class GoldenSentenceTrainer(object):
                 shuffle=True
             )
             for index, batch in enumerate(tqdm(self.dataloader)):
-                self.optimizer.zero_grad()
+
                 for key, tensor in batch.items():
                     batch[key] = tensor.to(self.device)
                 logits = self.model(
@@ -116,11 +121,14 @@ class GoldenSentenceTrainer(object):
                 )
                 loss = self.loss_fn(logits, batch["labels"])
                 # loss = self.calculate_loss(logits, batch["labels"])
+                self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
 
+
                 if index % 200 == 0:
+
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'
                           f'Loss: {loss.item()}')
 
