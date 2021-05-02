@@ -100,8 +100,9 @@ class Trainer(object):
             print('Evaluating on Dev ...')
             with torch.no_grad():
                 acc = self.evaluator(dev_dataloader, self.model, self.device)
+            print(f'Dev performance: Accuracy {acc}')
             if acc > self.max_acc:
-                print(f'Update! Dev performance: Accuracy {acc}')
+                print(f'Update!')
                 self.max_acc = acc
                 self.save()
 
