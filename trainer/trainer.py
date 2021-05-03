@@ -4,6 +4,7 @@ from torch.nn import CrossEntropyLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 from model.roberta import Reasoning
+from model.roberta_operator import ReasoningWithOperator
 from dataset.golden_dataset import GoldenDataset, Collator
 from dataset.golden_sentence_dataset import GoldenSentenceDataset
 from config import Argument
@@ -11,6 +12,7 @@ from evaluator import Evaluator
 
 
 dataset_dict = {"golden_dataset": GoldenDataset, "golden_sentence_dataset": GoldenSentenceDataset}
+model_dict = {"Reasoning": Reasoning, "ReasoningWithOperator": ReasoningWithOperator}
 
 
 class Trainer(object):
@@ -22,7 +24,7 @@ class Trainer(object):
         self.dev_dataset = dataset_dict[self.args.dataset]('dev')
         # self.test_dataset = Golden_Dataset('test')
         self.dataloader = None
-        self.model = Reasoning()
+        self.model = model_dict[self.args.model_class]()
         self.model.to(self.device)
 
         if self.args.load_pretrained:
@@ -78,8 +80,11 @@ class Trainer(object):
         self.model.load_state_dict(state_dict)
         print(f'The following params are not loaded from pretrained model: {unloaded_params}')
 
-    def convert_key(self, original: str) -> str:
+    def convert_key_seqcls(self, original: str) -> str:
         return '_classifier' + original[7:]
+
+    def convert_key(self, original: str) -> str:
+        return '_classifier.' + original
 
     def save(self):
         print(f'Model saved at {self.args.model_path}')

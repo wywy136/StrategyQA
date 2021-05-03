@@ -36,10 +36,10 @@ class GoldenSentenceDataset(GoldenDataset):
                 #         golden_sentence = self.find(facts, self.json_corpus[paragraph]['content'])
                 #         ret_dict["golden_sentence"].append(self.tokenizer(golden_sentence)["input_ids"])
 
-        inputs = ret_dict["question"]
+        inputs = ret_dict["question"] + [2]
         for gd_sent in ret_dict["golden_sentence"]:
-            inputs += [2] + gd_sent[1:]
-        inputs += [2] + ret_dict["operation"]
+            inputs += gd_sent[1:] + [2]  #ret_dict["operation"]
+        inputs += ret_dict["operation"]
         inputs = inputs[:self.arg.max_length]
         masks = [1] * len(inputs)
         seg = [0] * len(ret_dict["question"]) + [1] * (len(inputs) - len(ret_dict["question"]))

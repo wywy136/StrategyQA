@@ -21,15 +21,12 @@ class GoldenDataset(Dataset):
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
         self.operator_set = ['greater', 'less', 'before', 'after', 'larger',
                              'smaller', 'higher', 'lower', 'longer', 'shorter',
-                             'prior', 'same', 'identical to', 'equal', 'different',
+                             'prior', 'same', 'identical', 'equal', 'different',
                              'difference', 'match', 'considered', 'least', 'enough',
                              'and', 'or', 'all', 'also', 'both', 'included', 'include',
                              'overlap', 'listed', 'within', 'have', 'excluded',
                              'present', 'among', 'contain', 'absent from',
                              'times', 'multiplied', 'positive', 'divided', 'plus']
-
-    def golden_sentence(self, question: str, paragraph: str) -> str:
-        pass
 
     def get_operator(self, question: str) -> str:
         ans = []
