@@ -13,7 +13,8 @@ class Evaluator(object):
             loss, logits = model(
                 input=batch['input_ids'].long(),
                 mask=batch['masks'],
-                label=batch['labels'].long()
+                label=batch['labels'].long(),
+                op_len=batch['op_len']
             )
             for i in range(logits.size(0)):
                 prd = torch.argmax(logits[i]).item()

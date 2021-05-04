@@ -78,6 +78,7 @@ class Collator(object):
         input_ids = [each['input'] for each in batch]
         masks = [each['mask'] for each in batch]
         labels = [each['label'] for each in batch]
+        op_len = [each['op_len'] for each in batch]
 
         max_len = max([len(each) for each in input_ids])
 
@@ -88,9 +89,11 @@ class Collator(object):
         input_ids = torch.tensor(input_ids, dtype=torch.int32)
         masks = torch.tensor(masks, dtype=torch.int32)
         labels = torch.tensor(labels, dtype=torch.int32)
+        op_len = torch.tensor(op_len, dtype=torch.int32)
 
         return {
             'input_ids': input_ids,
             'masks': masks,
-            'labels': labels
+            'labels': labels,
+            'op_len': op_len
         }

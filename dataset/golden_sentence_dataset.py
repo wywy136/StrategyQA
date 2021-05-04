@@ -44,12 +44,14 @@ class GoldenSentenceDataset(GoldenDataset):
         masks = [1] * len(inputs)
         seg = [0] * len(ret_dict["question"]) + [1] * (len(inputs) - len(ret_dict["question"]))
         ans = 1 if piece['answer'] else 0
+        op_len = len(ret_dict["operation"])
 
         return {
             'input': inputs,
             'mask': masks,
             "segment": seg,
-            'label': ans
+            'label': ans,
+            'op_len': op_len
         }
 
     def find(self, facts, paragraph) -> str:

@@ -127,7 +127,8 @@ class Trainer(object):
                 loss, logits = self.model(
                     input=batch['input_ids'].long(),
                     mask=batch['masks'],
-                    label=batch['labels'].long()
+                    label=batch['labels'].long(),
+                    op_len=batch['op_len']
                 )
                 loss.backward()
                 self.optimizer.step()
