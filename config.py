@@ -4,7 +4,7 @@ from typing import List
 class Argument:
     pretrained_model_path: str = './pretrained_model/1_STAR_no_context.tar/1_STAR_no_context/weights.th'
     model_path: str = './checkpoints/ora_p_golden_sentence/1.pth'
-    model_class: str = "ReasoningWithOperator"
+    model_class: str = "ReasoningWithOperatorAbstract"
 
     train_path: str = "./data/train_gdsent.json"
     # test_path: str = "./data/strategyqa_train_test.json"

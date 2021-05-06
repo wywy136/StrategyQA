@@ -5,6 +5,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 
 from model.roberta import Reasoning
 from model.roberta_operator import ReasoningWithOperator
+from model.roberta_operator_abstract import ReasoningWithOperatorAbstract
 from dataset.golden_dataset import GoldenDataset, Collator
 from dataset.golden_sentence_dataset import GoldenSentenceDataset
 from config import Argument
@@ -12,7 +13,11 @@ from evaluator import Evaluator
 
 
 dataset_dict = {"golden_dataset": GoldenDataset, "golden_sentence_dataset": GoldenSentenceDataset}
-model_dict = {"Reasoning": Reasoning, "ReasoningWithOperator": ReasoningWithOperator}
+model_dict = {
+    "Reasoning": Reasoning,
+    "ReasoningWithOperator": ReasoningWithOperator,
+    "ReasoningWithOperatorAbstract": ReasoningWithOperatorAbstract
+}
 
 
 class Trainer(object):
@@ -129,13 +134,13 @@ class Trainer(object):
                     mask=batch['masks'],
                     label=batch['labels'].long(),
                     op_len=batch['op_len'],
-                    op_abstract=batch['op_abstract']
+                    op_abstract=batch['op_abstract'].long()
                 )
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
 
-                if index % 20 == 0:
+                if index % 50 == 0:
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'
                           f'Loss: {loss.item()}')
 

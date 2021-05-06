@@ -79,7 +79,7 @@ class GoldenDataset(Dataset):
         return ''.join(ans)
 
     def get_abstract_operator(self, question: str) -> int:
-        ans = []
+        ans = [4]
         for key, value in self.op_mapping.items():
             if key in question:
                 ans.append(value)
