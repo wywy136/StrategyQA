@@ -38,32 +38,20 @@ class GoldenSentenceDataset(GoldenDataset):
 
         inputs = ret_dict["question"] + [2]
         for gd_sent in ret_dict["golden_sentence"]:
-            inputs += gd_sent[1:] + [2]  #ret_dict["operation"]
+            inputs += gd_sent[1:] + [2]  # ret_dict["operation"]
         inputs += ret_dict["operation"]
         inputs = inputs[:self.arg.max_length]
         masks = [1] * len(inputs)
         seg = [0] * len(ret_dict["question"]) + [1] * (len(inputs) - len(ret_dict["question"]))
         ans = 1 if piece['answer'] else 0
         op_len = len(ret_dict["operation"])
+        op_abstract = self.get_abstract_operator(piece['question'])
 
         return {
             'input': inputs,
             'mask': masks,
             "segment": seg,
             'label': ans,
-            'op_len': op_len
+            'op_len': op_len,
+            'op_abstract': op_abstract
         }
-
-    def find(self, facts, paragraph) -> str:
-        sents = sent_tokenize(paragraph)
-        golden = ''
-        golden_ratio = 0
-        for sent in sents:
-            max_edit = 0
-            for fact in facts:
-                edit = Levenshtein.ratio(sent, fact)
-                max_edit = max(max_edit, edit)
-            if max_edit > golden_ratio:
-                golden_ratio = max_edit
-                golden = sent
-        return golden

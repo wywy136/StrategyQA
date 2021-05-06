@@ -14,7 +14,8 @@ class Evaluator(object):
                 input=batch['input_ids'].long(),
                 mask=batch['masks'],
                 label=batch['labels'].long(),
-                op_len=batch['op_len']
+                op_len=batch['op_len'],
+                op_abstract=batch['abstract']
             )
             for i in range(logits.size(0)):
                 prd = torch.argmax(logits[i]).item()

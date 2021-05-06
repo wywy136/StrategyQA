@@ -27,6 +27,49 @@ class GoldenDataset(Dataset):
                              'overlap', 'listed', 'within', 'have', 'excluded',
                              'present', 'among', 'contain', 'absent from',
                              'times', 'multiplied', 'positive', 'divided', 'plus']
+        self.op_mapping = {
+            'greater': 0,
+            'less': 0,
+            'before': 0,
+            'after': 0,
+            'larger': 0,
+            'smaller': 0,
+            'higher': 0,
+            'lower': 0,
+            'longer': 0,
+            'shorter': 0,
+            'prior': 0,
+            'same': 0,
+            'identical': 0,
+            'equal': 0,
+            'different': 0,
+            'difference': 0,
+            'match': 0,
+            'considered': 0,
+            'least': 2,
+            'enough': 2,
+            'times': 2,
+            'plus': 2,
+            'multiplied': 2,
+            'divided': 2,
+            'and': 1,
+            'or': 1,
+            'all': 1,
+            'also': 1,
+            'both': 1,
+            'included': 1,
+            'include': 1,
+            'overlap': 1,
+            'listed': 1,
+            'within': 1,
+            'have': 3,
+            'excluded': 3,
+            'present': 3,
+            'among': 3,
+            'contain': 3,
+            'absent from': 3,
+            'positive': 3
+        }
 
     def get_operator(self, question: str) -> str:
         ans = []
@@ -34,6 +77,13 @@ class GoldenDataset(Dataset):
             if op in question:
                 ans.append(op)
         return ''.join(ans)
+
+    def get_abstract_operator(self, question: str) -> int:
+        ans = []
+        for key, value in self.op_mapping.items():
+            if key in question:
+                ans.append(value)
+        return min(ans)
 
     def __len__(self) -> int:
         return len(self.json_data)
@@ -69,7 +119,8 @@ class GoldenDataset(Dataset):
         return {
             'input': inputs,
             'mask': masks,
-            'label': ans
+            'label': ans,
+            'op_len': 0
         }
 
 
@@ -79,6 +130,7 @@ class Collator(object):
         masks = [each['mask'] for each in batch]
         labels = [each['label'] for each in batch]
         op_len = [each['op_len'] for each in batch]
+        op_abstract = [each['op_abstract'] for each in batch]
 
         max_len = max([len(each) for each in input_ids])
 
@@ -90,10 +142,12 @@ class Collator(object):
         masks = torch.tensor(masks, dtype=torch.int32)
         labels = torch.tensor(labels, dtype=torch.int32)
         op_len = torch.tensor(op_len, dtype=torch.int32)
+        op_abstract = torch.tensor(op_abstract, dtype=torch.int32)
 
         return {
             'input_ids': input_ids,
             'masks': masks,
             'labels': labels,
-            'op_len': op_len
+            'op_len': op_len,
+            'op_abstract': op_abstract
         }

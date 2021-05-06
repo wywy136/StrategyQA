@@ -128,7 +128,8 @@ class Trainer(object):
                     input=batch['input_ids'].long(),
                     mask=batch['masks'],
                     label=batch['labels'].long(),
-                    op_len=batch['op_len']
+                    op_len=batch['op_len'],
+                    op_abstract=batch['op_abstract']
                 )
                 loss.backward()
                 self.optimizer.step()
