@@ -19,7 +19,7 @@ class GoldenSentenceDataset(GoldenDataset):
         ret_dict = {
             "question": self.tokenizer(piece['question'])["input_ids"],
             "golden_sentence": [],
-            "operation": self.tokenizer(self.get_operator(piece['question']))["input_ids"]
+            "operation": self.tokenizer(self.get_abstract_operator_text(piece['question']))["input_ids"]
         }
         for step_index, step in enumerate(path):
             if step_index >= len(piece["golden_sentence"]):

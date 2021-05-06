@@ -28,47 +28,47 @@ class GoldenDataset(Dataset):
                              'present', 'among', 'contain', 'absent from',
                              'times', 'multiplied', 'positive', 'divided', 'plus']
         self.op_mapping = {
-            'greater': 0,
-            'less': 0,
-            'before': 0,
-            'after': 0,
-            'larger': 0,
-            'smaller': 0,
-            'higher': 0,
-            'lower': 0,
-            'longer': 0,
-            'shorter': 0,
-            'prior': 0,
-            'same': 0,
-            'identical': 0,
-            'equal': 0,
-            'different': 0,
-            'difference': 0,
-            'match': 0,
-            'considered': 0,
-            'least': 2,
-            'enough': 2,
-            'times': 2,
-            'plus': 2,
-            'multiplied': 2,
-            'divided': 2,
-            'and': 1,
-            'or': 1,
-            'all': 1,
-            'also': 1,
-            'both': 1,
-            'included': 1,
-            'include': 1,
-            'overlap': 1,
-            'listed': 1,
-            'within': 1,
-            'have': 3,
-            'excluded': 3,
-            'present': 3,
-            'among': 3,
-            'contain': 3,
-            'absent from': 3,
-            'positive': 3
+            'greater': [0, 'comparison'],
+            'less': [0, 'comparison'],
+            'before': [0, 'comparison'],
+            'after': [0, 'comparison'],
+            'larger': [0, 'comparison'],
+            'smaller': [0, 'comparison'],
+            'higher': [0, 'comparison'],
+            'lower': [0, 'comparison'],
+            'longer': [0, 'comparison'],
+            'shorter': [0, 'comparison'],
+            'prior': [0, 'comparison'],
+            'same': [0, 'comparison'],
+            'identical': [0, 'comparison'],
+            'equal': [0, 'comparison'],
+            'different': [0, 'comparison'],
+            'difference': [0, 'comparison'],
+            'match': [0, 'comparison'],
+            'considered': [0, 'comparison'],
+            'least': [2, 'numerical'],
+            'enough': [2, 'numerical'],
+            'times': [2, 'numerical'],
+            'plus': [2, 'numerical'],
+            'multiplied': [2, 'numerical'],
+            'divided': [2, 'numerical'],
+            'and': [1, 'logical'],
+            'or': [1, 'logical'],
+            'all': [1, 'logical'],
+            'also': [1, 'logical'],
+            'both': [1, 'logical'],
+            'included': [1, 'logical'],
+            'include': [1, 'logical'],
+            'overlap': [1, 'logical'],
+            'listed': [1, 'logical'],
+            'within': [1, 'logical'],
+            'have': [3, 'entail'],
+            'excluded': [3, 'entail'],
+            'present': [3, 'entail'],
+            'among': [3, 'entail'],
+            'contain': [3, 'entail'],
+            'absent from': [3, 'entail'],
+            'positive': [3, 'entail']
         }
 
     def get_operator(self, question: str) -> str:
@@ -82,8 +82,15 @@ class GoldenDataset(Dataset):
         ans = [4]
         for key, value in self.op_mapping.items():
             if key in question:
-                ans.append(value)
+                ans.append(value[0])
         return min(ans)
+
+    def get_abstract_operator_text(self, question: str) -> str:
+        ans = []
+        for op in self.operator_set:
+            if op in question:
+                ans.append(self.op_mapping[op][1])
+        return ''.join(ans)
 
     def __len__(self) -> int:
         return len(self.json_data)
