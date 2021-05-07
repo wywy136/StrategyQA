@@ -17,7 +17,8 @@ class ReasoningWithOperatorAbstract(Module):
         self.opembedding = Embedding(5, 1024)
 
     def forward(
-        self, input: torch.Tensor,
+        self,
+        input: torch.Tensor,
         mask: torch.Tensor,
         label: torch.Tensor,
         op_len: torch.Tensor,

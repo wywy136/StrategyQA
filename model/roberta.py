@@ -10,7 +10,7 @@ class Reasoning(Module):
         self.roberta = RobertaForSequenceClassification.from_pretrained('roberta-large')
         # self.classifer = Linear(in_features=768, out_features=2)
 
-    def forward(self, input: torch.Tensor, mask: torch.Tensor, label: torch.Tensor) -> Tuple:
+    def forward(self, input: torch.Tensor, mask: torch.Tensor, label: torch.Tensor, op_len, op_abstract) -> Tuple:
         outputs = self.roberta(
             input_ids=input,
             attention_mask=mask,

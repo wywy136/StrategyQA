@@ -101,6 +101,7 @@ class GoldenSentenceTrainer(object):
             if f1 > self.max_f1:
                 self.max_f1 = f1
                 print('Update!')
+                self.save()
             print(f'P: {precision}\tR: {recall}\tF1: {f1}')
 
             self.model.train()
@@ -134,5 +135,3 @@ class GoldenSentenceTrainer(object):
 
                 # del batch, logits, loss
                 torch.cuda.empty_cache()
-
-            self.save()

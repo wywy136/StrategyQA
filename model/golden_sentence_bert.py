@@ -1,4 +1,4 @@
-from transformers import BertModel
+from transformers import RobertaModel
 from torch.nn import Module
 from torch import nn
 import torch
@@ -7,8 +7,8 @@ import torch
 class GoldenSentenceBert(Module):
     def __init__(self):
         super(GoldenSentenceBert, self).__init__()
-        self.bert = BertModel.from_pretrained('bert-base-uncased')
-        self.classifier = nn.Linear(768, 2)
+        self.bert = RobertaModel.from_pretrained('roberta-large')
+        self.classifier = nn.Linear(1024, 2)
 
     def forward(self, inputs, masks):
         # logits = []
@@ -19,4 +19,4 @@ class GoldenSentenceBert(Module):
         #     logit = self.classifier(cls).unsqueeze(0)  # [1, batch, 2]
         #     logits.append(logit)
 
-        return self.classifier(self.bert(inputs, masks, return_dict=True).pooler_output) # torch.cat(logits, 0).permute(1, 0, 2)
+        return self.classifier(self.bert(inputs, masks, return_dict=True).pooler_output)  # torch.cat(logits, 0).permute(1, 0, 2)

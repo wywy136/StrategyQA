@@ -78,8 +78,8 @@ class Trainer(object):
         unloaded_params = []
         state_dict = self.model.state_dict()
         for name, param in state_dict.items():
-            if self.convert_key(name) in pretrained_state_dict:
-                state_dict[name] = pretrained_state_dict[self.convert_key(name)]
+            if self.convert_key_seqcls(name) in pretrained_state_dict:
+                state_dict[name] = pretrained_state_dict[self.convert_key_seqcls(name)]
             else:
                 unloaded_params.append(name)
         self.model.load_state_dict(state_dict)
