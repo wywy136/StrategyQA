@@ -56,6 +56,50 @@ class GoldenSentenceTrainer(object):
         print(f'Model saved at {self.args.model_path}')
         torch.save(self.model, self.args.model_path)
 
+    def evaluate(self, dev_dataloader):
+        all = 0.
+        matched = 0.
+        para_triple = {}
+        with torch.no_grad():
+            for index, batch in enumerate(tqdm(dev_dataloader)):
+
+                for key, tensor in batch.items():
+                    batch[key] = tensor.to(self.device)
+                logits = self.model(
+                    inputs=batch['inputs'],
+                    masks=batch['masks']
+                )
+                predicted = torch.argmax(logits, dim=1)
+
+                for i in range(logits.size(0)):
+                    para_index = batch["paras"][i].item()
+                    if para_index not in para_triple:
+                        para_triple[para_index] = (logits[i][1].item(), predicted[i].item(), batch["labels"][i].item())
+                    else:
+                        if logits[i][1].item() > para_triple[para_index][0]:
+                            para_triple[para_index] = (logits[i][1].item(), predicted[i].item(), batch["labels"][i].item())
+                # for i in range(batch['labels'].size(0)):
+                #     if batch['labels'][i].item() == 1:
+                #         recall_denom += 1
+                #     if predicted[i].item() == 1:
+                #         precision_denom += 1
+                #     if batch['labels'][i].item() == 1 and predicted[i].item() == 1:
+                #         matched += 1
+                for key, triple in para_triple.items():
+                    all += 1
+                    if triple[1] == 1 and triple[2] == 1:
+                        matched += 1
+        # precision = matched / (precision_denom + 1e-5)
+        # recall = matched / (recall_denom + 1e-5)
+        # f1 = 2 * precision * recall / (precision + recall + 1e-5)
+        acc = matched / all
+        if acc > self.max_f1:
+            self.max_f1 = acc
+            print('Update!')
+            self.save()
+        # print(f'P: {precision}\tR: {recall}\tF1: {f1}')
+        print(f'Acc: {acc}')
+
     def train(self):
         for epoch in range(self.args.epoch_num):
 
@@ -70,39 +114,7 @@ class GoldenSentenceTrainer(object):
             )
             print('Evaluating on Dev ...')
             print(len(self.dev_dataset))
-            precision_denom = 0
-            recall_denom = 0
-            matched = 0
-            with torch.no_grad():
-            #     acc = self.evaluator(dev_dataloader, self.model, self.device)
-            # if acc > self.max_acc:
-            #     print(f'Update! Dev performance: Accuracy {acc}')
-            #     self.max_acc = acc
-            #     self.save()
-                for index, batch in enumerate(tqdm(dev_dataloader)):
-                    # self.optimizer.zero_grad()
-                    for key, tensor in batch.items():
-                        batch[key] = tensor.to(self.device)
-                    logits = self.model(
-                        inputs=batch['inputs'],
-                        masks=batch['masks']
-                    )
-                    predicted = torch.argmax(logits, dim=1)
-                    for i in range(batch['labels'].size(0)):
-                        if batch['labels'][i].item() == 1:
-                            recall_denom += 1
-                        if predicted[i].item() == 1:
-                            precision_denom += 1
-                        if batch['labels'][i].item() == 1 and predicted[i].item() == 1:
-                            matched += 1
-            precision = matched / (precision_denom + 1e-5)
-            recall = matched / (recall_denom + 1e-5)
-            f1 = 2 * precision * recall / (precision + recall + 1e-5)
-            if f1 > self.max_f1:
-                self.max_f1 = f1
-                print('Update!')
-                self.save()
-            print(f'P: {precision}\tR: {recall}\tF1: {f1}')
+            self.evaluate(dev_dataloader)
 
             self.model.train()
             self.dataloader = DataLoader(

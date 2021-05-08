@@ -18,9 +18,11 @@ class SquadDataset(Dataset):
             self.data: List[Dict] = json.load(open(self.args.squad_dev_path, 'r', encoding='utf-8'))["data"]
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.combined_data: List[Dict] = []
+        para_index = -1
         for passage in self.data:
             for paragraph in passage["paragraphs"]:
                 context = paragraph["context"]
+                para_index += 1
                 for qa in paragraph['qas']:
                     if not qa["is_impossible"]:
                         question = qa["question"]
@@ -38,9 +40,10 @@ class SquadDataset(Dataset):
                                 "question": question,
                                 "answer": label,
                                 "context": context,
-                                "sent": sent
+                                "sent": sent,
+                                "paragraph_index": para_index
                             })
-        self.combined_data = self.combined_data[:200000]
+        # self.combined_data = self.combined_data[:200000]
 
     def __len__(self) -> int:
         return len(self.combined_data)
@@ -54,6 +57,7 @@ class SquadDataset(Dataset):
         )
         masks = [1] * len(inputs)
         labels = piece["answer"]
+        para_index = piece["paragraph_index"]
         # for sent_index, sent in enumerate(sent_tokenize(piece["context"])):
         #     one_input = self.tokenizer.convert_tokens_to_ids(['[CLS]'] + self.tokenizer.tokenize(piece["question"]) +
         #         ['[SEP]']) + self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(piece["context"]) +
@@ -68,7 +72,8 @@ class SquadDataset(Dataset):
         return {
             "input": inputs,
             "mask": masks,
-            "label": labels
+            "label": labels,
+            "para": para_index
         }
 
 
@@ -77,6 +82,7 @@ class SquadDatasetCollator(object):
         inputs: List[List] = [each["input"] for each in batch]
         masks: List[List] = [each["mask"] for each in batch]
         labels: List = [each["label"] for each in batch]
+        para: List = [each["para"] for each in batch]
 
         max_seq_len = 0
         for i in range(len(inputs)):
@@ -100,9 +106,11 @@ class SquadDatasetCollator(object):
         inputs: torch.Tensor = torch.tensor(inputs)  # [batch, max_seq_len]
         masks: torch.Tensor = torch.tensor(masks)  # [batch, max_seq_len]
         labels: torch.Tensor = torch.tensor(labels, dtype=torch.int64)  # [batch]
+        paras: torch.Tensor = torch.tensor(para)
 
         return {
             "inputs": inputs,
             "masks": masks,
-            "labels": labels
+            "labels": labels,
+            "paras": paras
         }
