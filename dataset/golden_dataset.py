@@ -127,7 +127,8 @@ class GoldenDataset(Dataset):
             'input': inputs,
             'mask': masks,
             'label': ans,
-            'op_len': 0
+            'op_len': 0,
+            'op_abstract': 0
         }
 
 

@@ -2,9 +2,9 @@ from typing import List
 
 
 class Argument:
-    pretrained_model_path: str = './pretrained_model/1_STAR_no_context.tar/1_STAR_no_context/weights.th'
+    pretrained_model_path: str = './pretrained_model/2_boolq/2_boolq/weights.th'
     model_path: str = './checkpoints/ora_p_golden_sentence/1.pth'
-    model_class: str = "ReasoningWithOperatorAbstract"
+    model_class: str = "Reasoning"
 
     train_path: str = "./data/train_gdsent.json"
     # test_path: str = "./data/strategyqa_train_test.json"
@@ -30,7 +30,7 @@ class Argument:
     pretrain_learning_rate: float = 1e-5
 
     epoch_num: int = 20
-    batch_size: int = 16
+    batch_size: int = 8
     learning_rate: float = 1e-5
     tuning_rate: float = 1e-5
 

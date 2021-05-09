@@ -1,6 +1,4 @@
 from typing import Dict
-import Levenshtein
-from nltk.tokenize import sent_tokenize
 from dataset.golden_dataset import GoldenDataset
 
 
