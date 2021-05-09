@@ -8,11 +8,16 @@ from model.roberta_operator import ReasoningWithOperator
 from model.roberta_operator_abstract import ReasoningWithOperatorAbstract
 from dataset.golden_dataset import GoldenDataset, Collator
 from dataset.golden_sentence_dataset import GoldenSentenceDataset
+from dataset.last_step_dataset import LastStepDataset
 from config import Argument
 from evaluator import Evaluator
 
 
-dataset_dict = {"golden_dataset": GoldenDataset, "golden_sentence_dataset": GoldenSentenceDataset}
+dataset_dict = {
+    "golden_dataset": GoldenDataset,
+    "golden_sentence_dataset": GoldenSentenceDataset,
+    "last_step_dataset": LastStepDataset
+}
 model_dict = {
     "Reasoning": Reasoning,
     "ReasoningWithOperator": ReasoningWithOperator,
@@ -26,6 +31,7 @@ class Trainer(object):
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
         self.dataset = dataset_dict[self.args.dataset]()
+        print(f'Dataset: {self.args.dataset}')
         self.dev_dataset = dataset_dict[self.args.dataset]('dev')
         # self.test_dataset = Golden_Dataset('test')
         self.dataloader = None

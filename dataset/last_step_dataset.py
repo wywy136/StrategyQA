@@ -2,7 +2,7 @@ from typing import Dict
 from dataset.golden_dataset import GoldenDataset
 
 
-class GoldenSentenceDataset(GoldenDataset):
+class LastStepDataset(GoldenDataset):
     def __init__(self, split: str = 'train'):
         GoldenDataset.__init__(self, split)
 

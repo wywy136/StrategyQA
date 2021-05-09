@@ -6,7 +6,7 @@ class Argument:
     model_path: str = './checkpoints/ora_p_golden_sentence/1.pth'
     model_class: str = "Reasoning"
 
-    train_path: str = "./data/train_gdsent.json"
+    train_path: str = "./data/train_gdsent.json"  # data/transformer_qa_ORA-P_train_no_placeholders.json
     # test_path: str = "./data/strategyqa_train_test.json"
     dev_path: str = "./data/dev_gdsent.json"
     corpus_path: str = "./data/strategyqa_train_paragraphs.json"
