@@ -42,8 +42,8 @@ class SquadGoldenSentencePredictor(object):
             json.dump(write_obj, f)
 
     def find(self, question, context) -> list:
-        gdsent = []
-        scores = []
+        gdsent = ""
+        score = -1
         sents = sent_tokenize(context)
         for sent in sents:
             input_id = self.tokenizer.convert_tokens_to_ids(
@@ -56,12 +56,8 @@ class SquadGoldenSentencePredictor(object):
                 input_id.unsqueeze(0),
                 mask.unsqueeze(0)
             )
-            scores.append(logit.squeeze(0)[1].item())
-            prediction = torch.argmax(logit.squeeze(0))
-            if prediction.item() == 1:
-                gdsent.append(sent)
-        if not gdsent:
-            max_index = scores.index(max(scores))
-            gdsent.append(sents[max_index])
+            if logit.squeeze(0)[1] > score:
+                score = logit.squeeze(0)[1]
+                gdsent = sent
 
-        return gdsent
+        return [gdsent]

@@ -4,12 +4,12 @@ from typing import List
 class Argument:
     pretrained_model_path: str = './pretrained_model/2_boolq/2_boolq/weights.th'
     model_path: str = './checkpoints/ora_p_golden_sentence/1.pth'
-    model_class: str = "Reasoning"
+    model_class: str = "ReasoningWithOperator"
 
     train_path: str = "./data/train_gdsent.json"  # data/transformer_qa_ORA-P_train_no_placeholders.json
     # test_path: str = "./data/strategyqa_train_test.json"
     dev_path: str = "./data/dev_gdsent.json"
-    corpus_path: str = "./data/strategyqa_train_paragraphs.json"
+    corpus_path: str = "./data/strategyqa/strategyqa_train_paragraphs.json"
     train_gdsent_path: str = "./data/train_gdsent.json"
     dev_gdsent_path: str = "./data/dev_gdsent.json"
     dataset: str = "golden_sentence_dataset"

@@ -15,17 +15,25 @@ class ReasoningWithOperator(Module):
         self.classifer = Linear(in_features=1024 * 2, out_features=2)
         self.gru = torch.nn.GRU(input_size=1024, hidden_size=1024, batch_first=True)
 
-    def forward(self, input: torch.Tensor, mask: torch.Tensor, label: torch.Tensor, op_len: torch.Tensor) -> Tuple:
+    def forward(
+        self,
+        input: torch.Tensor,
+        mask: torch.Tensor,
+        label: torch.Tensor,
+        op_len: torch.Tensor,
+        op_abstract: torch.Tensor
+    ) -> Tuple:
         outputs = self.roberta(
             input_ids=input,
             attention_mask=mask,
             return_dict=True
         ).last_hidden_state
-        repre = []
-        for i in range(outputs.size(0)):
-            op_rpr, hidden = self.gru(outputs[i, -op_len[i].item():, :].unsqueeze(0))
-            repre.append(hidden)
-        repre = torch.cat(repre, dim=0)
-        repre = torch.cat((outputs[:, 0, :], repre.squeeze(1)), dim=1)
+        repre = torch.cat((outputs[:, 0, :], outputs[:, -2, :]), dim=1)
+        # repre = []
+        # for i in range(outputs.size(0)):
+        #     op_rpr, hidden = self.gru(outputs[i, -op_len[i].item():, :].unsqueeze(0))
+        #     repre.append(hidden)
+        # repre = torch.cat(repre, dim=0)
+        # repre = torch.cat((outputs[:, 0, :], repre.squeeze(1)), dim=1)
         logits = self.classifer(repre)
         return loss_fn(logits, label), logits

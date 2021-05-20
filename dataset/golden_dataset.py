@@ -25,7 +25,7 @@ class GoldenDataset(Dataset):
                              'difference', 'match', 'considered', 'least', 'enough',
                              'and', 'or', 'all', 'also', 'both', 'included', 'include',
                              'overlap', 'listed', 'within', 'have', 'excluded',
-                             'present', 'among', 'contain', 'absent from',
+                             'present', 'among', 'contain', 'absent',
                              'times', 'multiplied', 'positive', 'divided', 'plus']
         self.op_mapping = {
             'greater': [0, 'comparison'],
@@ -57,18 +57,18 @@ class GoldenDataset(Dataset):
             'all': [1, 'logical'],
             'also': [1, 'logical'],
             'both': [1, 'logical'],
-            'included': [1, 'logical'],
-            'include': [1, 'logical'],
-            'overlap': [1, 'logical'],
-            'listed': [1, 'logical'],
-            'within': [1, 'logical'],
+            'included': [3, 'entail'],
+            'include': [3, 'entail'],
+            'overlap': [3, 'entail'],
+            'listed': [3, 'entail'],
+            'within': [3, 'entail'],
             'have': [3, 'entail'],
             'excluded': [3, 'entail'],
             'present': [3, 'entail'],
             'among': [3, 'entail'],
             'contain': [3, 'entail'],
-            'absent from': [3, 'entail'],
-            'positive': [3, 'entail']
+            'absent': [3, 'entail'],
+            'positive': [2, 'numerical']
         }
 
     def get_operator(self, question: str) -> str:
