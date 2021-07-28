@@ -2,19 +2,22 @@ from typing import List
 
 
 class Argument:
-    pretrained_model_path: str = './pretrained_model/2_boolq/2_boolq/weights.th'
-    model_path: str = './checkpoints/ora_p_golden_sentence/1.pth'
-    model_class: str = "ReasoningWithOperator"
+    pretrained_model_path: str = './pretrained_model/6_STAR_ORA-P/weights.th'
+    model_path: str = './checkpoints/ora_p/1.pth'
+    model_class: str = "Reasoning"
 
     train_path: str = "./data/train_gdsent.json"  # data/transformer_qa_ORA-P_train_no_placeholders.json
-    # test_path: str = "./data/strategyqa_train_test.json"
     dev_path: str = "./data/dev_gdsent.json"
+    test_path: str = "./data/test.json"
     corpus_path: str = "./data/strategyqa/strategyqa_train_paragraphs.json"
     train_gdsent_path: str = "./data/train_gdsent.json"
     dev_gdsent_path: str = "./data/dev_gdsent.json"
-    dataset: str = "golden_sentence_dataset"
-    fields: List = ["question"]
+    train_dataset: str = "golden_dataset"
+    dev_dataset: str = "ir_avgcls_dataset"
+    test_dataset: str = "ir_avgcls_dataset"
+    fields: List = ["question", "evidence"]
     max_length: int = 512
+
     boolq_path: str = './data/boolq/train.jsonl'
     twentyquestion_path: str = './data/twentyquestions/v1.0.twentyquestions.tar'
     squad_train_path: str = './data/squad/train-v2.0.json'
@@ -30,9 +33,14 @@ class Argument:
     pretrain_learning_rate: float = 1e-5
 
     epoch_num: int = 20
-    batch_size: int = 8
+    batch_size: int = 1
     learning_rate: float = 1e-5
     tuning_rate: float = 1e-5
 
     warmup_rate: float = 0.1
     weight_decay: float = 0.01
+
+    ir_avgcls_dev_path: str = './sqa_ir/5_dev_candidate_path_avg.json'
+    ir_avgcls_test_path: str = './sqa_ir/5_test_candidate_path_avg.json'
+    paraid_content_path: str = './sqa_ir/paraid_content.pk'
+    prediction_path: str = './predictions/5_avg_prediction.json'

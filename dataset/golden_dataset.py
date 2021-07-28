@@ -128,7 +128,8 @@ class GoldenDataset(Dataset):
             'mask': masks,
             'label': ans,
             'op_len': 0,
-            'op_abstract': 0
+            'op_abstract': 0,
+            'qid': piece["qid"]
         }
 
 
@@ -139,6 +140,7 @@ class Collator(object):
         labels = [each['label'] for each in batch]
         op_len = [each['op_len'] for each in batch]
         op_abstract = [each['op_abstract'] for each in batch]
+        qid = [each['qid'] for each in batch]
 
         max_len = max([len(each) for each in input_ids])
 
@@ -157,5 +159,6 @@ class Collator(object):
             'masks': masks,
             'labels': labels,
             'op_len': op_len,
-            'op_abstract': op_abstract
+            'op_abstract': op_abstract,
+            'qid': qid
         }

@@ -1,15 +1,15 @@
-from typing import Iterator
-
+from torch.utils.data import DataLoader
 from torch.nn import Module
 import torch
 
 
 class Evaluator(object):
-    def __call__(self, dataloader: Iterator, model: Module, device: torch.device) -> float:
+    def __call__(self, dataloader: DataLoader, model: Module, device: torch.device) -> float:
         all, match = 0, 0
         for index, batch in enumerate(dataloader):
             for key, tensor in batch.items():
-                batch[key] = tensor.to(device)
+                if type(tensor) == torch.Tensor:
+                    batch[key] = tensor.to(device)
             loss, logits = model(
                 input=batch['input_ids'].long(),
                 mask=batch['masks'],

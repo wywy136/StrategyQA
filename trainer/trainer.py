@@ -9,14 +9,17 @@ from model.roberta_operator_abstract import ReasoningWithOperatorAbstract
 from dataset.golden_dataset import GoldenDataset, Collator
 from dataset.golden_sentence_dataset import GoldenSentenceDataset
 from dataset.last_step_dataset import LastStepDataset
+from dataset.ir_avgcls_dataset import IrAvgClsDataset
 from config import Argument
 from evaluator import Evaluator
+from predictor.ir_avgcls_predictor import IrAvrClsPredictor
 
 
 dataset_dict = {
     "golden_dataset": GoldenDataset,
     "golden_sentence_dataset": GoldenSentenceDataset,
-    "last_step_dataset": LastStepDataset
+    "last_step_dataset": LastStepDataset,
+    "ir_avgcls_dataset": IrAvgClsDataset
 }
 model_dict = {
     "Reasoning": Reasoning,
@@ -30,10 +33,10 @@ class Trainer(object):
         self.args = Argument
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
-        self.dataset = dataset_dict[self.args.dataset]()
-        print(f'Dataset: {self.args.dataset}')
-        self.dev_dataset = dataset_dict[self.args.dataset]('dev')
-        # self.test_dataset = Golden_Dataset('test')
+        self.dataset = dataset_dict[self.args.train_dataset]()
+        print(f'Dataset: {self.args.train_dataset}')
+        self.dev_dataset = dataset_dict[self.args.dev_dataset]('dev')
+        self.test_dataset = dataset_dict[self.args.test_dataset]('test')
         self.dataloader = None
         self.model = model_dict[self.args.model_class]()
         self.model.to(self.device)
@@ -41,14 +44,6 @@ class Trainer(object):
         if self.args.load_pretrained:
             self.load_pretrained_state_dict()
 
-        # listed_params = list(self.model.named_parameters())
-        # grouped_parameters = [
-        #     {'params': [p for n, p in listed_params if 'bert' in n],
-        #      'lr': self.args.tuning_rate,
-        #      'weight_decay': self.args.weight_decay},
-        #     {'params': [p for n, p in listed_params if 'bert' not in n],
-        #      'weight_decay': self.args.weight_decay}
-        # ]
         self.optimizer = AdamW(
             self.model.parameters(),
             lr=self.args.learning_rate,
@@ -64,6 +59,7 @@ class Trainer(object):
 
         self.loss_fn = CrossEntropyLoss()
         self.evaluator = Evaluator()
+        self.predictor = IrAvrClsPredictor(self.args.prediction_path)
         self.max_acc = 0.
 
     def load_pretrained(self):
@@ -84,8 +80,8 @@ class Trainer(object):
         unloaded_params = []
         state_dict = self.model.state_dict()
         for name, param in state_dict.items():
-            if self.convert_key(name) in pretrained_state_dict:
-                state_dict[name] = pretrained_state_dict[self.convert_key(name)]
+            if self.convert_key_seqcls(name) in pretrained_state_dict:
+                state_dict[name] = pretrained_state_dict[self.convert_key_seqcls(name)]
             else:
                 unloaded_params.append(name)
         self.model.load_state_dict(state_dict)
@@ -122,6 +118,18 @@ class Trainer(object):
                 self.max_acc = acc
                 self.save()
 
+                test_dataloader = DataLoader(
+                    dataset=self.test_dataset,
+                    batch_size=self.args.batch_size,
+                    num_workers=self.args.num_workers,
+                    collate_fn=Collator(),
+                    pin_memory=True if self.args.cuda else False,
+                    shuffle=False
+                )
+                print(f'Generating predictions ...')
+                with torch.no_grad():
+                    self.predictor(test_dataloader, self.model, self.device)
+
             self.model.train()
             self.dataloader = DataLoader(
                 dataset=self.dataset,
@@ -134,7 +142,8 @@ class Trainer(object):
             for index, batch in enumerate(self.dataloader):
                 self.optimizer.zero_grad()
                 for key, tensor in batch.items():
-                    batch[key] = tensor.to(self.device)
+                    if type(tensor) == torch.Tensor:
+                        batch[key] = tensor.to(self.device)
                 loss, logits = self.model(
                     input=batch['input_ids'].long(),
                     mask=batch['masks'],
