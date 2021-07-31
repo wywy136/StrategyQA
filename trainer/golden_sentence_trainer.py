@@ -52,6 +52,10 @@ class GoldenSentenceTrainer(object):
         golden = golden.reshape(-1)
         return self.loss_fn(logit, golden)
 
+    def load_pretrained(self):
+        self.model = torch.load(self.args.pretrained_model_path, map_location=self.device)
+        print(f'Pretrained model loaded from {self.args.pretrained_model_path}')
+
     def save(self):
         print(f'Model saved at {self.args.model_path}')
         torch.save(self.model, self.args.model_path)
@@ -139,8 +143,7 @@ class GoldenSentenceTrainer(object):
                 self.optimizer.step()
                 self.scheduler.step()
 
-
-                if index % 200 == 0:
+                if index % 500 == 0:
 
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'
                           f'Loss: {loss.item()}')

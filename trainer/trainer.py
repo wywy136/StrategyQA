@@ -36,11 +36,12 @@ class Trainer(object):
         self.dataset = dataset_dict[self.args.train_dataset]()
         print(f'Dataset: {self.args.train_dataset}')
         self.dev_dataset = dataset_dict[self.args.dev_dataset]('dev')
-        self.test_dataset = dataset_dict[self.args.test_dataset]('test')
+        # self.test_dataset = dataset_dict[self.args.test_dataset]('test')
         self.dataloader = None
-        self.model = model_dict[self.args.model_class]()
-        self.model.to(self.device)
 
+        self.model = model_dict[self.args.model_class]()
+        print(f'Model: {self.args.model_class}')
+        self.model.to(self.device)
         if self.args.load_pretrained:
             self.load_pretrained_state_dict()
 
@@ -59,7 +60,7 @@ class Trainer(object):
 
         self.loss_fn = CrossEntropyLoss()
         self.evaluator = Evaluator()
-        self.predictor = IrAvrClsPredictor(self.args.prediction_path)
+        # self.predictor = IrAvrClsPredictor(self.args.prediction_path)
         self.max_acc = 0.
 
     def load_pretrained(self):
@@ -118,18 +119,6 @@ class Trainer(object):
                 self.max_acc = acc
                 self.save()
 
-                test_dataloader = DataLoader(
-                    dataset=self.test_dataset,
-                    batch_size=self.args.batch_size,
-                    num_workers=self.args.num_workers,
-                    collate_fn=Collator(),
-                    pin_memory=True if self.args.cuda else False,
-                    shuffle=False
-                )
-                print(f'Generating predictions ...')
-                with torch.no_grad():
-                    self.predictor(test_dataloader, self.model, self.device)
-
             self.model.train()
             self.dataloader = DataLoader(
                 dataset=self.dataset,
@@ -158,15 +147,3 @@ class Trainer(object):
                 if index % 50 == 0:
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'
                           f'Loss: {loss.item()}')
-
-                # test_dataloader = DataLoader(
-                #     dataset=self.test_dataset,
-                #     batch_size=self.args.batch_size,
-                #     num_workers=self.args.num_workers,
-                #     collate_fn=Collator(),
-                #     pin_memory=True if self.args.cuda else False,
-                #     shuffle=False
-                # )
-                # with torch.no_grad():
-                #     acc = self.evaluator(test_dataloader, self.model, self.device)
-                # print(f'Test performance: Accuracy {acc}')

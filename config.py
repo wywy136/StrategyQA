@@ -3,7 +3,7 @@ from typing import List
 
 class Argument:
     pretrained_model_path: str = './pretrained_model/6_STAR_ORA-P/weights.th'
-    model_path: str = './checkpoints/ora_p/1.pth'
+    model_path: str = './checkpoints/gd_sent/1.pth'
     model_class: str = "Reasoning"
 
     train_path: str = "./data/train_gdsent.json"  # data/transformer_qa_ORA-P_train_no_placeholders.json
@@ -12,9 +12,9 @@ class Argument:
     corpus_path: str = "./data/strategyqa/strategyqa_train_paragraphs.json"
     train_gdsent_path: str = "./data/train_gdsent.json"
     dev_gdsent_path: str = "./data/dev_gdsent.json"
-    train_dataset: str = "golden_dataset"
-    dev_dataset: str = "ir_avgcls_dataset"
-    test_dataset: str = "ir_avgcls_dataset"
+    train_dataset: str = "golden_sentence_dataset"
+    dev_dataset: str = "golden_sentence_dataset"
+    test_dataset: str = "golden_sentence_dataset"
     fields: List = ["question", "evidence"]
     max_length: int = 512
 
@@ -44,3 +44,7 @@ class Argument:
     ir_avgcls_test_path: str = './sqa_ir/5_test_candidate_path_avg.json'
     paraid_content_path: str = './sqa_ir/paraid_content.pk'
     prediction_path: str = './predictions/5_avg_prediction.json'
+
+    sentchain_train: str = './sqa_ir/7_train_sentchain.json'
+    sentchain_dev: str = './sqa_ir/7_dev_sentchain.json'
+    sentchain_test: str = ''

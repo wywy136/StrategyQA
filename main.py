@@ -8,7 +8,7 @@ def main():
     t = Trainer()
     t.train()
     # t.pretrain()
-    # t.save()
+    t.save()
     # m = GoldenSentenceTrainer()
     # m.load_pretrained()
     # m.train()
