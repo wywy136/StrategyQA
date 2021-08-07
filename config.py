@@ -3,18 +3,20 @@ from typing import List
 
 class Argument:
     pretrained_model_path: str = './pretrained_model/6_STAR_ORA-P/weights.th'
-    model_path: str = './checkpoints/gd_sent/1.pth'
-    model_class: str = "Reasoning"
+    model_path: str = './checkpoints/combination/1.pth'
+    model_class: str = "ReasoningPlain"
 
     train_path: str = "./data/train_gdsent.json"  # data/transformer_qa_ORA-P_train_no_placeholders.json
     dev_path: str = "./data/dev_gdsent.json"
     test_path: str = "./data/test.json"
     corpus_path: str = "./data/strategyqa/strategyqa_train_paragraphs.json"
+
     train_gdsent_path: str = "./data/train_gdsent.json"
     dev_gdsent_path: str = "./data/dev_gdsent.json"
-    train_dataset: str = "golden_sentence_dataset"
-    dev_dataset: str = "golden_sentence_dataset"
-    test_dataset: str = "golden_sentence_dataset"
+
+    train_dataset: str = "reasoning_dataset"
+    dev_dataset: str = "reasoning_dataset"
+    test_dataset: str = "reasoning_dataset"
     fields: List = ["question", "evidence"]
     max_length: int = 512
 
@@ -48,3 +50,7 @@ class Argument:
     sentchain_train: str = './sqa_ir/7_train_sentchain.json'
     sentchain_dev: str = './sqa_ir/7_dev_sentchain.json'
     sentchain_test: str = ''
+
+    reason_train: str = './data/reason/train_sents.pk'
+    reason_dev: str = './data/reason/dev_sents.pk'
+    reason_test: str = './data/reason/test_sents.pk'

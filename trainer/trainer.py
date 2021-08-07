@@ -1,30 +1,37 @@
+from tqdm import tqdm
 from torch.utils.data import DataLoader
 import torch
-from torch.nn import CrossEntropyLoss
 from transformers import AdamW, get_linear_schedule_with_warmup
 
 from model.roberta import Reasoning
 from model.roberta_operator import ReasoningWithOperator
 from model.roberta_operator_abstract import ReasoningWithOperatorAbstract
+from model.reasoning_plain import ReasoningPlain
 from dataset.golden_dataset import GoldenDataset, Collator
 from dataset.golden_sentence_dataset import GoldenSentenceDataset
 from dataset.last_step_dataset import LastStepDataset
 from dataset.ir_avgcls_dataset import IrAvgClsDataset
+from dataset.reasoning_dataset import ReasoningDataset, ReasoningCollator
 from config import Argument
-from evaluator import Evaluator
+from evaluator.evaluator import Evaluator
 from predictor.ir_avgcls_predictor import IrAvrClsPredictor
-
 
 dataset_dict = {
     "golden_dataset": GoldenDataset,
     "golden_sentence_dataset": GoldenSentenceDataset,
     "last_step_dataset": LastStepDataset,
-    "ir_avgcls_dataset": IrAvgClsDataset
+    "ir_avgcls_dataset": IrAvgClsDataset,
+    "reasoning_dataset": ReasoningDataset
+}
+collator_dict = {
+    "collator": Collator,
+    "reasoning_collator": ReasoningCollator
 }
 model_dict = {
     "Reasoning": Reasoning,
     "ReasoningWithOperator": ReasoningWithOperator,
-    "ReasoningWithOperatorAbstract": ReasoningWithOperatorAbstract
+    "ReasoningWithOperatorAbstract": ReasoningWithOperatorAbstract,
+    "ReasoningPlain": ReasoningPlain
 }
 
 
@@ -36,14 +43,15 @@ class Trainer(object):
         self.dataset = dataset_dict[self.args.train_dataset]()
         print(f'Dataset: {self.args.train_dataset}')
         self.dev_dataset = dataset_dict[self.args.dev_dataset]('dev')
-        # self.test_dataset = dataset_dict[self.args.test_dataset]('test')
+        self.test_dataset = dataset_dict[self.args.test_dataset]('test')
         self.dataloader = None
+        self.collator = ReasoningCollator()
 
         self.model = model_dict[self.args.model_class]()
         print(f'Model: {self.args.model_class}')
         self.model.to(self.device)
         if self.args.load_pretrained:
-            self.load_pretrained_state_dict()
+            self.load_pretrained_roberta()
 
         self.optimizer = AdamW(
             self.model.parameters(),
@@ -58,23 +66,23 @@ class Trainer(object):
             num_training_steps=total_steps
         )
 
-        self.loss_fn = CrossEntropyLoss()
+        # self.loss_fn = CrossEntropyLoss()
         self.evaluator = Evaluator()
-        # self.predictor = IrAvrClsPredictor(self.args.prediction_path)
+        self.predictor = IrAvrClsPredictor(self.args.prediction_path)
         self.max_acc = 0.
 
-    def load_pretrained(self):
-        pretrained_model: torch.nn.Module = torch.load(self.args.pretrained_model_path, map_location=self.device)
-        pretrained_params = [key for key, value in pretrained_model.named_parameters()]
-        state_dict = self.model.state_dict()
-        unloaded_params = []
-        for key, value in self.model.named_parameters():
-            if key in pretrained_params:
-                state_dict[key] = pretrained_model.state_dict()[key]
-            else:
-                unloaded_params.append(key)
-        self.model.load_state_dict(state_dict)
-        print(f'The following parameters are not loaded from pretrained model: {unloaded_params}')
+    # def load_pretrained(self):
+    #     pretrained_model: torch.nn.Module = torch.load(self.args.pretrained_model_path, map_location=self.device)
+    #     pretrained_params = [key for key, value in pretrained_model.named_parameters()]
+    #     state_dict = self.model.state_dict()
+    #     unloaded_params = []
+    #     for key, value in self.model.named_parameters():
+    #         if key in pretrained_params:
+    #             state_dict[key] = pretrained_model.state_dict()[key]
+    #         else:
+    #             unloaded_params.append(key)
+    #     self.model.load_state_dict(state_dict)
+    #     print(f'The following parameters are not loaded from pretrained model: {unloaded_params}')
 
     def load_pretrained_state_dict(self):
         pretrained_state_dict = torch.load(self.args.pretrained_model_path, map_location=self.device)
@@ -88,11 +96,23 @@ class Trainer(object):
         self.model.load_state_dict(state_dict)
         print(f'The following params are not loaded from pretrained model: {unloaded_params}')
 
+    def load_pretrained_roberta(self):
+        pretrained_state_dict = torch.load(self.args.pretrained_model_path, map_location=self.device)
+        unloaded_params = []
+        state_dict = self.model.state_dict()
+        for name, param in state_dict.items():
+            if self.convert_key_roberta(name) in pretrained_state_dict:
+                state_dict[name] = pretrained_state_dict[self.convert_key_roberta(name)]
+            else:
+                unloaded_params.append(name)
+        self.model.load_state_dict(state_dict)
+        print(f'The following params are not loaded from pretrained model: {unloaded_params}')
+
     def convert_key_seqcls(self, original: str) -> str:
         return '_classifier' + original[7:]
 
-    def convert_key(self, original: str) -> str:
-        return '_classifier.' + original
+    def convert_key_roberta(self, original: str) -> str:
+        return '_classifier.roberta.' + '.'.join(original.split('.')[1:])
 
     def save(self):
         print(f'Model saved at {self.args.model_path}')
@@ -101,45 +121,60 @@ class Trainer(object):
     def train(self):
         for epoch in range(self.args.epoch_num):
 
+            # Evaluation
             self.model.eval()
             dev_dataloader = DataLoader(
                 dataset=self.dev_dataset,
                 batch_size=self.args.batch_size,
                 num_workers=self.args.num_workers,
-                collate_fn=Collator(),
+                collate_fn=self.collator,
                 pin_memory=True if self.args.cuda else False,
                 shuffle=False
             )
             print('Evaluating on Dev ...')
             with torch.no_grad():
-                acc = self.evaluator(dev_dataloader, self.model, self.device)
-            print(f'Dev performance: Accuracy {acc}')
+                acc, op_acc = self.evaluator(dev_dataloader, self.model, self.device)
+            if op_acc:
+                print(f'Dev performance: Accuracy {acc}\tOperator Accuracy: {op_acc}')
+            else:
+                print(f'Dev performance: Accuracy {acc}')
             if acc > self.max_acc:
                 print(f'Update!')
                 self.max_acc = acc
                 self.save()
 
+                # Prediction
+                print(f'Generating predictions on Test ...')
+                test_dataloader = DataLoader(
+                    dataset=self.test_dataset,
+                    batch_size=self.args.batch_size,
+                    num_workers=self.args.num_workers,
+                    collate_fn=self.collator,
+                    pin_memory=True if self.args.cuda else False,
+                    shuffle=False
+                )
+                self.predictor(test_dataloader, self.model, self.device)
+
+            # Training
             self.model.train()
             self.dataloader = DataLoader(
                 dataset=self.dataset,
                 batch_size=self.args.batch_size,
                 num_workers=self.args.num_workers,
-                collate_fn=Collator(),
+                collate_fn=self.collator,
                 pin_memory=True if self.args.cuda else False,
                 shuffle=True
             )
-            for index, batch in enumerate(self.dataloader):
+            for index, batch in tqdm(enumerate(self.dataloader)):
                 self.optimizer.zero_grad()
                 for key, tensor in batch.items():
                     if type(tensor) == torch.Tensor:
                         batch[key] = tensor.to(self.device)
-                loss, logits = self.model(
-                    input=batch['input_ids'].long(),
-                    mask=batch['masks'],
-                    label=batch['labels'].long(),
-                    op_len=batch['op_len'],
-                    op_abstract=batch['op_abstract'].long()
+                loss, logits, masked_loss, masked_logits = self.model(
+                    batch
                 )
+                if masked_loss is not None:
+                    loss += masked_logits
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()

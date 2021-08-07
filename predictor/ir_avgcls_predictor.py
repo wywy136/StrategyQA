@@ -15,13 +15,7 @@ class IrAvrClsPredictor:
             for key, tensor in batch.items():
                 if type(tensor) == torch.Tensor:
                     batch[key] = tensor.to(device)
-            loss, logits = model(
-                input=batch['input_ids'].long(),
-                mask=batch['masks'],
-                label=batch['labels'].long(),
-                op_len=batch['op_len'],
-                op_abstract=batch['op_abstract'].long()
-            )
+            loss, logits, masked_loss, masked_logits = model(batch)
             for i in range(logits.size(0)):
                 prd = torch.argmax(logits[i]).item()
                 self.predictions.append({

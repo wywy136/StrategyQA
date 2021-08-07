@@ -6,7 +6,7 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 from model.roberta import Reasoning
 from dataset.golden_dataset import GoldenDataset, Collator
 from config import Argument
-from evaluator import Evaluator
+from evaluator.evaluator import Evaluator
 
 
 class Pretrainer(object):

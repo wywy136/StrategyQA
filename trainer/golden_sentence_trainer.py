@@ -7,7 +7,7 @@ from tqdm import tqdm
 from model.golden_sentence_bert import GoldenSentenceBert
 from dataset.squad import SquadDataset, SquadDatasetCollator
 from config import Argument
-from evaluator import Evaluator
+from evaluator.evaluator import Evaluator
 
 
 class GoldenSentenceTrainer(object):
