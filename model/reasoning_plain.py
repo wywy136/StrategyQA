@@ -34,7 +34,7 @@ class ReasoningPlain(Module):
             input_ids=input,
             attention_mask=mask
         ).pooler_output
-        original_logits = self.label(original_representation)
+        original_logits = self.label_out_proj(self.label_dense(original_representation))
         original_loss = self.loss_fn(
             input=original_logits,
             target=label
