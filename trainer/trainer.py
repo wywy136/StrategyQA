@@ -179,7 +179,7 @@ class Trainer(object):
                     batch
                 )
                 if masked_loss is not None:
-                    loss += masked_loss
+                    loss = loss + self.args.weightofoperator * masked_loss
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()
