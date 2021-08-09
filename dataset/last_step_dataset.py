@@ -3,8 +3,8 @@ from dataset.golden_dataset import GoldenDataset
 
 
 class LastStepDataset(GoldenDataset):
-    def __init__(self, split: str = 'train'):
-        GoldenDataset.__init__(self, split)
+    def __init__(self, args, split: str = 'train'):
+        GoldenDataset.__init__(self, args, split)
 
     def __len__(self) -> int:
         return len(self.json_data)

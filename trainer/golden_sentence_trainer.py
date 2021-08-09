@@ -6,17 +6,16 @@ from tqdm import tqdm
 
 from model.golden_sentence_bert import GoldenSentenceBert
 from dataset.squad import SquadDataset, SquadDatasetCollator
-from config import Argument
 from evaluator.evaluator import Evaluator
 
 
 class GoldenSentenceTrainer(object):
-    def __init__(self):
-        self.args = Argument
+    def __init__(self, args):
+        self.args = args
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
-        self.dataset = SquadDataset('train')
-        self.dev_dataset = SquadDataset('dev')
+        self.dataset = SquadDataset(args, 'train')
+        self.dev_dataset = SquadDataset(args, 'dev')
         # self.test_dataset = Golden_Dataset('test')
         self.dataloader = None
         self.model = GoldenSentenceBert()

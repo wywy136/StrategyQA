@@ -5,13 +5,11 @@ import torch
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
 
-from config import Argument
-
 
 class GoldenDataset(Dataset):
-    def __init__(self, split: str = 'train'):
+    def __init__(self, args, split: str = 'train'):
         Dataset.__init__(self)
-        self.arg = Argument
+        self.arg = args
         self.data = open(self.arg.train_path, 'r', encoding='utf-8') if split == 'train' else \
             open(self.arg.dev_path, 'r', encoding='utf-8')
         self.corpus = open(self.arg.corpus_path, 'r', encoding='utf-8')

@@ -6,12 +6,10 @@ from torch.utils.data import Dataset
 from transformers import BertTokenizer
 from nltk import sent_tokenize
 
-from config import Argument
-
 
 class SquadDataset(Dataset):
-    def __init__(self, split):
-        self.args = Argument
+    def __init__(self, args, split):
+        self.args = args
         if split == 'train':
             self.data: List[Dict] = json.load(open(self.args.squad_train_path, 'r', encoding='utf-8'))["data"]
         else:

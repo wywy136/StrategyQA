@@ -4,13 +4,11 @@ import json
 from torch.utils.data import Dataset
 from transformers import RobertaTokenizer
 
-from config import Argument
-
 
 class BoolQ_Dataset(Dataset):
-    def __int__(self):
+    def __int__(self, args):
         Dataset.__init__(self)
-        self.arg = Argument
+        self.arg = args
         self.data = open(self.arg.boolq_path, 'r', encoding='utf-8')
         self.json_data: List[Dict] = json.load(self.data)
 

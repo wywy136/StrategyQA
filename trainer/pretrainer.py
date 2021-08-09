@@ -5,16 +5,15 @@ from transformers import AdamW, get_linear_schedule_with_warmup
 
 from model.roberta import Reasoning
 from dataset.golden_dataset import GoldenDataset, Collator
-from config import Argument
 from evaluator.evaluator import Evaluator
 
 
 class Pretrainer(object):
-    def __init__(self):
-        self.args = Argument
+    def __init__(self, args):
+        self.args = args
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
-        self.dataset = GoldenDataset()
+        self.dataset = GoldenDataset(args)
         self.dataloader = None
         self.model = Reasoning()
         self.model.to(self.device)

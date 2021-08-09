@@ -12,7 +12,6 @@ from dataset.golden_sentence_dataset import GoldenSentenceDataset
 from dataset.last_step_dataset import LastStepDataset
 from dataset.ir_avgcls_dataset import IrAvgClsDataset
 from dataset.reasoning_dataset import ReasoningDataset, ReasoningCollator
-from config import Argument
 from evaluator.evaluator import Evaluator
 from predictor.ir_avgcls_predictor import IrAvrClsPredictor
 
@@ -36,14 +35,14 @@ model_dict = {
 
 
 class Trainer(object):
-    def __init__(self):
-        self.args = Argument
+    def __init__(self, args):
+        self.args = args
         self.device = torch.device('cuda') if self.args.cuda else torch.device('cpu')
 
-        self.dataset = dataset_dict[self.args.train_dataset]()
+        self.dataset = dataset_dict[self.args.train_dataset](self.args)
         print(f'Dataset: {self.args.train_dataset}')
-        self.dev_dataset = dataset_dict[self.args.dev_dataset]('dev')
-        self.test_dataset = dataset_dict[self.args.test_dataset]('test')
+        self.dev_dataset = dataset_dict[self.args.dev_dataset](self.args, 'dev')
+        self.test_dataset = dataset_dict[self.args.test_dataset](self.args, 'test')
         self.dataloader = None
         self.collator = ReasoningCollator()
 
@@ -112,7 +111,12 @@ class Trainer(object):
         return '_classifier' + original[7:]
 
     def convert_key_roberta(self, original: str) -> str:
-        return '_classifier.roberta.' + '.'.join(original.split('.')[1:])
+        if 'encoder' in original.split('.'):
+            return '_classifier.roberta.' + '.'.join(original.split('.')[1:])
+        elif 'dense' in original:
+            return '_classifier.classifier.dense.' + original.split('.')[-1]
+        elif 'out_proj' in original:
+            return '_classifier.classifier.out_proj.' + original.split('.')[-1]
 
     def save(self):
         print(f'Model saved at {self.args.model_path}')
@@ -153,7 +157,8 @@ class Trainer(object):
                     pin_memory=True if self.args.cuda else False,
                     shuffle=False
                 )
-                self.predictor(test_dataloader, self.model, self.device)
+                with torch.no_grad():
+                    self.predictor(test_dataloader, self.model, self.device)
 
             # Training
             self.model.train()
@@ -174,7 +179,7 @@ class Trainer(object):
                     batch
                 )
                 if masked_loss is not None:
-                    loss += masked_logits
+                    loss += masked_loss
                 loss.backward()
                 self.optimizer.step()
                 self.scheduler.step()

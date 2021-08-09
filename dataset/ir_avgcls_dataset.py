@@ -5,12 +5,10 @@ from typing import Dict, List
 from ftfy import fix_text
 from transformers import RobertaTokenizer
 
-from config import Argument
-
 
 class IrAvgClsDataset:
-    def __init__(self, split: str = 'dev'):
-        self.arg = Argument
+    def __init__(self, args, split: str = 'dev'):
+        self.arg = args
         self.original_data: List[Dict] = json.load(
             open(self.arg.dev_path, 'r', encoding='utf-8')
         ) if split == 'dev' else json.load(

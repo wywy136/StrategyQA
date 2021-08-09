@@ -8,7 +8,11 @@ class ReasoningPlain(Module):
     def __init__(self):
         super(ReasoningPlain, self).__init__()
         self.encoder = RobertaModel.from_pretrained('roberta-large')
-        self.label = Linear(
+        self.label_dense = Linear(
+            in_features=1024,
+            out_features=1024
+        )
+        self.label_out_proj = Linear(
             in_features=1024,
             out_features=2
         )

@@ -3,12 +3,10 @@ import json
 
 from transformers import RobertaTokenizer
 
-from config import Argument
-
 
 class GoldenSentenceDataset:
-    def __init__(self, split: str = 'train'):
-        self.arg = Argument
+    def __init__(self, args, split: str = 'train'):
+        self.arg = args
         if split == 'train':
             self.data = open(self.arg.sentchain_train, 'r', encoding='utf-8')
             self.original = open(self.arg.train_path, 'r', encoding='utf-8')

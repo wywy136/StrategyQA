@@ -6,12 +6,10 @@ import nltk
 from transformers import RobertaTokenizer
 import torch
 
-from config import Argument
-
 
 class ReasoningDataset:
-    def __init__(self, split: str = 'train'):
-        self.arg = Argument
+    def __init__(self, args, split: str = 'train'):
+        self.arg = args
         if split == 'train':
             self.data: Dict = pickle.load(open(self.arg.reason_train, 'rb'))
             self.original = open(self.arg.train_path, 'r', encoding='utf-8')

@@ -3,12 +3,11 @@ import json
 from tqdm import tqdm
 from transformers import BertTokenizer
 from nltk import sent_tokenize
-from config import Argument
 
 
 class SquadGoldenSentencePredictor(object):
-    def __init__(self, split):
-        self.arg = Argument
+    def __init__(self, args, split):
+        self.arg = args
         self.device = torch.device('cuda') if self.arg.cuda else torch.device('cpu')
         self.model = torch.load(self.arg.model_path, map_location=self.device)
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
