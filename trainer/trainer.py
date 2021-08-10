@@ -171,7 +171,6 @@ class Trainer(object):
                 shuffle=True
             )
             for index, batch in tqdm(enumerate(self.dataloader)):
-                self.optimizer.zero_grad()
                 for key, tensor in batch.items():
                     if type(tensor) == torch.Tensor:
                         batch[key] = tensor.to(self.device)
@@ -181,8 +180,10 @@ class Trainer(object):
                 if masked_loss is not None:
                     loss = loss + self.args.weightofoperator * masked_loss
                 loss.backward()
-                self.optimizer.step()
-                self.scheduler.step()
+                if index % self.args.gradient_accumulate_step == 0:
+                    self.optimizer.step()
+                    self.scheduler.step()
+                    self.optimizer.zero_grad()
 
                 if index % 50 == 0:
                     print(f'Epoch: {epoch}/{self.args.epoch_num}\tBatch: {index}/{len(self.dataloader)}\t'

@@ -58,6 +58,8 @@ if __name__ == '__main__':
     parser.add_argument('--learning_rate', type=float, default=1e-5)
     parser.add_argument('--tuning_rate', type=float, default=1e-5)
     parser.add_argument('--weightofoperator', type=float, default=1.)
+    parser.add_argument('--op_classification', type=str, default='./classification/4.json')
+    parser.add_argument('--gradient_accumulate_step', type=int, default=1)
 
     parser.add_argument('--warmup_rate', type=float, default=0.1)
     parser.add_argument('--weight_decay', type=float, default=0.01)
