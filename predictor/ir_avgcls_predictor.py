@@ -11,6 +11,7 @@ class IrAvrClsPredictor:
         self.predictions = []
 
     def __call__(self, dataloader: DataLoader, model: Module, device: torch.device):
+        self.predictions = []
         for index, batch in enumerate(dataloader):
             for key, tensor in batch.items():
                 if type(tensor) == torch.Tensor:
@@ -22,5 +23,6 @@ class IrAvrClsPredictor:
                     "qid": batch['qid'][i],
                     "answer": prd
                 })
+
         with open(self.output_path, "w", encoding="utf-8") as f:
             json.dump(self.predictions, f)
