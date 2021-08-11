@@ -15,6 +15,7 @@ from dataset.reasoning_dataset import ReasoningDataset, ReasoningCollator
 from evaluator.evaluator import Evaluator
 from predictor.ir_avgcls_predictor import IrAvrClsPredictor
 
+
 dataset_dict = {
     "golden_dataset": GoldenDataset,
     "golden_sentence_dataset": GoldenSentenceDataset,
@@ -49,7 +50,9 @@ class Trainer(object):
         self.model = model_dict[self.args.model_class]()
         print(f'Model: {self.args.model_class}')
         self.model.to(self.device)
-        if self.args.load_pretrained:
+        if self.args.eval_only:
+            self.load_pretrained_all()
+        elif self.args.load_pretrained:
             self.load_pretrained_roberta()
 
         self.optimizer = AdamW(
@@ -105,7 +108,11 @@ class Trainer(object):
             else:
                 unloaded_params.append(name)
         self.model.load_state_dict(state_dict)
-        print(f'The following params are not loaded from pretrained model: {unloaded_params}')
+        print(f'The following params are not loaded from a pretrained model: {unloaded_params}')
+
+    def load_pretrained_all(self):
+        print('Loading from a previously trained model for evaluation and test ...')
+        self.model = torch.load(self.args.trained_model_path)
 
     def convert_key_seqcls(self, original: str) -> str:
         return '_classifier' + original[7:]
@@ -159,6 +166,9 @@ class Trainer(object):
                 )
                 with torch.no_grad():
                     self.predictor(test_dataloader, self.model, self.device)
+
+            if self.args.eval_only:
+                break
 
             # Training
             self.model.train()

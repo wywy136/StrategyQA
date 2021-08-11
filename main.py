@@ -23,6 +23,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='StrategyQA')
     parser.add_argument('--pretrained_model_path', type=str, default='./pretrained_model/6_STAR_ORA-P/weights.th')
     parser.add_argument('--model_path', type=str, default='./checkpoints/combination/1.pth')
+    parser.add_argument('--trained_model_path', type=str, default='./checkpoints/combination/1.pth')
     parser.add_argument('--model_class', type=str, default="ReasoningPlain")
 
     parser.add_argument('--train_path', type=str, default="./data/train_gdsent.json")  # data/transformer_qa_ORA-P_train_no_placeholders.json
@@ -47,6 +48,7 @@ if __name__ == '__main__':
     parser.add_argument('--cuda', type=bool, default=False)
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--load_pretrained', type=bool, default=True)
+    parser.add_argument('--eval_only', type=bool, default=True)
 
     # pretrain_epoch_num_boolq: int = 20
     # pretrain_epoch_num_20q: int = 20

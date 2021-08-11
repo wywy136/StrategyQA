@@ -19,7 +19,7 @@ class ReasoningDataset:
         else:
             self.data: Dict = pickle.load(open(self.arg.reason_test, 'rb'))
             self.original = open(self.arg.test_path, 'r', encoding='utf-8')
-        self.original: List = json.load(self.original)[:20]
+        self.original: List = json.load(self.original)
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-large')
 
         with open(self.arg.op_classification, 'r') as f:
