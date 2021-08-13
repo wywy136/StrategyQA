@@ -7,6 +7,7 @@ from model.roberta import Reasoning
 from model.roberta_operator import ReasoningWithOperator
 from model.roberta_operator_abstract import ReasoningWithOperatorAbstract
 from model.reasoning_plain import ReasoningPlain
+from model.reasoning_attention import ReasoningSelfAttention
 from dataset.golden_dataset import GoldenDataset, Collator
 from dataset.golden_sentence_dataset import GoldenSentenceDataset
 from dataset.last_step_dataset import LastStepDataset
@@ -31,7 +32,8 @@ model_dict = {
     "Reasoning": Reasoning,
     "ReasoningWithOperator": ReasoningWithOperator,
     "ReasoningWithOperatorAbstract": ReasoningWithOperatorAbstract,
-    "ReasoningPlain": ReasoningPlain
+    "ReasoningPlain": ReasoningPlain,
+    "ReasoningSelfAttention": ReasoningSelfAttention
 }
 
 
@@ -118,12 +120,14 @@ class Trainer(object):
         return '_classifier' + original[7:]
 
     def convert_key_roberta(self, original: str) -> str:
-        if 'encoder' in original.split('.'):
+        if 'encoder' in original.split('.') and 'self_attention' not in original:
             return '_classifier.roberta.' + '.'.join(original.split('.')[1:])
-        elif 'dense' in original:
+        elif 'dense' in original and 'self_attention' not in original:
             return '_classifier.classifier.dense.' + original.split('.')[-1]
-        elif 'out_proj' in original:
+        elif 'out_proj' in original and 'self_attention' not in original:
             return '_classifier.classifier.out_proj.' + original.split('.')[-1]
+        else:
+            return original
 
     def save(self):
         print(f'Model saved at {self.args.model_path}')
